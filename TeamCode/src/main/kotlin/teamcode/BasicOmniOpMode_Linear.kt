@@ -92,7 +92,7 @@ class BasicOmniOpMode_Linear : LinearOpMode() {
         // when you first test your robot, push the left joystick forward and observe the direction the wheels turn.
         // Reverse the direction (flip FORWARD <-> REVERSE ) of any wheel that runs backward
         // Keep testing until ALL the wheels move the robot forward when you push the left joystick forward.
-        frontLeftDrive!!.direction = DcMotorSimple.Direction.REVERSE
+        frontLeftDrive!!.direction = DcMotorSimple.Direction.FORWARD
         backLeftDrive!!.direction = DcMotorSimple.Direction.REVERSE
         frontRightDrive!!.direction = DcMotorSimple.Direction.FORWARD
         backRightDrive!!.direction = DcMotorSimple.Direction.FORWARD
