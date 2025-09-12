@@ -109,8 +109,7 @@ class BasicOmniOpMode_Linear : LinearOpMode() {
             var max: Double
 
             // POV Mode uses left joystick to go forward & strafe, and right joystick to rotate.
-            val axial =
-                -gamepad1.left_stick_y.toDouble() // Note: pushing stick forward gives negative value
+            val axial = -gamepad1.left_stick_y.toDouble() // Note: pushing stick forward gives negative value
             val lateral = gamepad1.left_stick_x.toDouble()
             val yaw = gamepad1.right_stick_x.toDouble()
 
