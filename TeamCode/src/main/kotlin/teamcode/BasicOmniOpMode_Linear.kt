@@ -157,7 +157,7 @@ class BasicOmniOpMode_Linear : LinearOpMode() {
             backRightDrive!!.power = backRightPower
 
             // Show the elapsed game time and wheel power.
-            telemetry.addData("Status", "Run Time: $runtime")
+            telemetry.addData("Banana", "Run Time: $runtime")
             telemetry.addData("Front left/Right", "%4.2f, %4.2f", frontLeftPower, frontRightPower)
             telemetry.addData("Back  left/Right", "%4.2f, %4.2f", backLeftPower, backRightPower)
             telemetry.update()
