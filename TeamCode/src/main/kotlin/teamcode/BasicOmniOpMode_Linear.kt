@@ -67,6 +67,7 @@ import kotlin.math.max
 @TeleOp(name = "Basic: Omni Linear OpMode", group = "Linear OpMode")
 class BasicOmniOpMode_Linear : LinearOpMode() {
     // Declare OpMode members for each of the 4 motors.
+
     private val runtime = ElapsedTime()
     private var frontLeftDrive: DcMotor? = null
     private var backLeftDrive: DcMotor? = null
@@ -74,6 +75,7 @@ class BasicOmniOpMode_Linear : LinearOpMode() {
     private var backRightDrive: DcMotor? = null
 
     override fun runOpMode() {
+
         // Initialize the hardware variables. Note that the strings used here must correspond
         // to the names assigned during the robot configuration step on the DS or RC devices.
 
