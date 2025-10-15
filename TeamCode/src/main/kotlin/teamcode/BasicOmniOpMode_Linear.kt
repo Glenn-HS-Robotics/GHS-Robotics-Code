@@ -69,20 +69,20 @@ class BasicOmniOpMode_Linear : LinearOpMode() {
     // Declare OpMode members for each of the 4 motors.
 
     private val runtime = ElapsedTime()
-    private var frontLeftDrive: DcMotor? = null
-    private var backLeftDrive: DcMotor? = null
-    private var frontRightDrive: DcMotor? = null
-    private var backRightDrive: DcMotor? = null
+    private lateinit var frontLeftDrive: DcMotor
+    private lateinit var backLeftDrive: DcMotor
+    private lateinit var frontRightDrive: DcMotor
+    private lateinit var backRightDrive: DcMotor
 
     override fun runOpMode() {
 
         // Initialize the hardware variables. Note that the strings used here must correspond
         // to the names assigned during the robot configuration step on the DS or RC devices.
 
-        frontLeftDrive = hardwareMap.get(DcMotor::class.java, "front_left_drive")
-        backLeftDrive = hardwareMap.get(DcMotor::class.java, "back_left_drive")
-        frontRightDrive = hardwareMap.get(DcMotor::class.java, "front_right_drive")
-        backRightDrive = hardwareMap.get(DcMotor::class.java, "back_right_drive")
+        frontLeftDrive = hardwareMap.get(DcMotor::class.java, "front_left")
+        backLeftDrive = hardwareMap.get(DcMotor::class.java, "back_left")
+        frontRightDrive = hardwareMap.get(DcMotor::class.java, "front_right")
+        backRightDrive = hardwareMap.get(DcMotor::class.java, "back_right")
 
         // ########################################################################################
         // !!!            IMPORTANT Drive Information. Test your motor directions.            !!!!!
