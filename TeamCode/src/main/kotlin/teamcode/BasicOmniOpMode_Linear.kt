@@ -153,10 +153,10 @@ class BasicOmniOpMode_Linear : LinearOpMode() {
             */
 
             // Send calculated power to wheels
-            frontLeftDrive!!.power = frontLeftPower
-            frontRightDrive!!.power = frontRightPower
-            backLeftDrive!!.power = backLeftPower
-            backRightDrive!!.power = backRightPower
+            frontLeftDrive!!.power = frontLeftPower * 1
+            frontRightDrive!!.power = frontRightPower * 1
+            backLeftDrive!!.power = backLeftPower * 1
+            backRightDrive!!.power = backRightPower * 1
 
             // Show the elapsed game time and wheel power.
             telemetry.addData("Info", "Run Time: $runtime")

@@ -31,11 +31,13 @@ package teamcode
 import com.qualcomm.robotcore.eventloop.opmode.Disabled
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp
+import com.qualcomm.robotcore.hardware.DcMotor
 import org.firstinspires.ftc.robotcore.external.hardware.camera.BuiltinCameraDirection
 import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName
 import org.firstinspires.ftc.vision.VisionPortal
 import org.firstinspires.ftc.vision.apriltag.AprilTagDetection
 import org.firstinspires.ftc.vision.apriltag.AprilTagProcessor
+import kotlin.math.pow
 
 /*
  * This OpMode illustrates the basics of AprilTag recognition and pose estimation,
@@ -62,7 +64,6 @@ import org.firstinspires.ftc.vision.apriltag.AprilTagProcessor
  * Remove or comment out the @Disabled line to add this OpMode to the Driver Station OpMode list.
  */
 @TeleOp(name = "Concept: AprilTag", group = "Concept")
-@Disabled
 class ConceptAprilTag : LinearOpMode() {
     /**
      * The variable to store our instance of the AprilTag processor.
@@ -142,7 +143,7 @@ class ConceptAprilTag : LinearOpMode() {
 
         // Set the camera (webcam vs. built-in RC phone camera).
         if (USE_WEBCAM) {
-            builder.setCamera(hardwareMap.get<WebcamName?>(WebcamName::class.java, "Camera"))
+            builder.setCamera(hardwareMap.get<WebcamName?>(WebcamName::class.java, "Webcam 1"))
         } else {
             builder.setCamera(BuiltinCameraDirection.BACK)
         }
@@ -170,6 +171,10 @@ class ConceptAprilTag : LinearOpMode() {
         // Disable or re-enable the aprilTag processor at any time.
         //visionPortal.setProcessorEnabled(aprilTag, true);
     } // end method initAprilTag()
+
+    private fun cameraMotor(motor: DcMotor) {
+
+    }
 
 
     /**
