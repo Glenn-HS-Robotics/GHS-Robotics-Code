@@ -94,7 +94,7 @@ class RobotAutoDriveByEncoder_Linear : LinearOpMode() {
                     launch {
                         launcherMotor.power = 1.0
                         sleep(1000)
-                        launcherMotor.power = 1.0
+                        launcherMotor.power = 0.0
                     }
                 }
             }
