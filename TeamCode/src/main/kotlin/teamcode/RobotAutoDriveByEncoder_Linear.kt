@@ -32,6 +32,9 @@ import com.qualcomm.robotcore.eventloop.opmode.Autonomous
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode
 import com.qualcomm.robotcore.hardware.DcMotor
 import com.qualcomm.robotcore.util.ElapsedTime
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 
 /*
  * This OpMode illustrates the concept of driving a path based on encoder counts.
@@ -65,19 +68,37 @@ class RobotAutoDriveByEncoder_Linear : LinearOpMode() {
     private lateinit var backLeftDrive: DcMotor
     private lateinit var frontRightDrive: DcMotor
     private lateinit var backRightDrive: DcMotor
+    private lateinit var launcherMotor: DcMotor
+    private lateinit var intakeMotor: DcMotor
+
+
 
     override fun runOpMode() {
+        runBlocking {
+            // Initialize the drive system variables.
+            frontLeftDrive = hardwareMap.get(DcMotor::class.java, "front_left")
+            backLeftDrive = hardwareMap.get(DcMotor::class.java, "back_left")
+            frontRightDrive = hardwareMap.get(DcMotor::class.java, "front_right")
+            backRightDrive = hardwareMap.get(DcMotor::class.java, "back_right")
+            launcherMotor = hardwareMap.get(DcMotor::class.java, "launcher_yeet")
+            intakeMotor = hardwareMap.get(DcMotor::class.java, "intake_motor")
 
-        // Initialize the drive system variables.
-        frontLeftDrive = hardwareMap.get(DcMotor::class.java, "front_left")
-        backLeftDrive = hardwareMap.get(DcMotor::class.java, "back_left")
-        frontRightDrive = hardwareMap.get(DcMotor::class.java, "front_right")
-        backRightDrive = hardwareMap.get(DcMotor::class.java, "back_right")
+            waitForStart()
 
-        waitForStart()
-
-        val chassis = Chassis(frontLeftDrive, frontRightDrive, backLeftDrive, backRightDrive, this)
-        chassis.encoderVert(12.0)
+            val chassis = Chassis(frontLeftDrive, frontRightDrive, backLeftDrive, backRightDrive, this@RobotAutoDriveByEncoder_Linear)
+            chassis.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER)
+            chassis.setMode(DcMotor.RunMode.RUN_USING_ENCODER)
+            chassis.encoderVert(12.0)
+            while (true) {
+                if (gamepad1.a) {
+                    launch {
+                        launcherMotor.power = 1.0
+                        sleep(1000)
+                        launcherMotor.power = 1.0
+                    }
+                }
+            }
+        }
     }
 
     companion object {
