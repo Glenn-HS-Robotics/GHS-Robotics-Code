@@ -38,9 +38,6 @@ import com.qualcomm.robotcore.hardware.Servo
 import kotlin.math.max
 
 
-/*
- * This file contains an example of a Linear "OpMode".
- */
 @Suppress("unused")
 @TeleOp(name = "Basic: Omni Linear OpMode", group = "Linear OpMode")
 class BasicOmniOpMode_Linear : LinearOpMode() {
@@ -54,7 +51,7 @@ class BasicOmniOpMode_Linear : LinearOpMode() {
     private var launchMoto: DcMotor? = null
     private var intakeRuns:DcMotor? = null
 
-    // ==== Servo + kicker state (only part changed) ====
+    // Servo + kicker state (only part changed) -----------------------------
     private var pusher: Servo? = null     // servo on Expansion Hub 2, port 0, name: "servo_motor"
     private val REST_POS = 1.0
     private val KICK_POS = 0.5
@@ -63,7 +60,7 @@ class BasicOmniOpMode_Linear : LinearOpMode() {
     private enum class KickState { IDLE, EXTENDING, RETRACTING }
     private var kickState = KickState.IDLE
     private val phaseTimer = ElapsedTime()
-    // ================================================
+    // ----------------------------------------------------------------
 
     private val LAUNCHER_POWER = 1.0
     private val intake_power = 0.65
@@ -97,7 +94,7 @@ class BasicOmniOpMode_Linear : LinearOpMode() {
         var prevB = false
         var intakeEnabled = false
         var prevA = false
-        var prevX = false          // <=== added for X button edge-detect (servo only)
+        var prevX = false          // added for X button edge-detect (servo only)
 
         // run until the end of the match (driver presses STOP)
         while (opModeIsActive()) {
@@ -125,7 +122,7 @@ class BasicOmniOpMode_Linear : LinearOpMode() {
             var backLeftPower = axial - lateral + yaw
             var backRightPower = axial + lateral - yaw
 
-            // Normalize the values so no wheel power exceeds 100%
+            // Normalize the values so no wheel power exceeds 100% (This basically makes it so that nothing goes above 100)
             // This ensures that the robot maintains the desired motion.
             max = max(abs(frontLeftPower), abs(frontRightPower))
             max = max(max, abs(backLeftPower))
@@ -148,7 +145,7 @@ class BasicOmniOpMode_Linear : LinearOpMode() {
             launchMoto!!.power = if(launcherEnabled) LAUNCHER_POWER else 0.0
             intakeRuns!!.power = if(intakeEnabled) intake_power else 0.0
 
-            // ===== X-triggered single kick cycle (servo code only) =====
+            // Pressing x makes the servo trigger and return to original position
             val xNow = gamepad2.x
 
             // On rising edge of X and only if not in a kick, start a cycle
@@ -161,7 +158,7 @@ class BasicOmniOpMode_Linear : LinearOpMode() {
 
             when (kickState) {
                 KickState.IDLE -> {
-                    // ensure we stay parked at rest
+                    // ensure that the servo stays parked at rest
                     pusher!!.position = REST_POS
                 }
                 KickState.EXTENDING -> {
@@ -178,9 +175,9 @@ class BasicOmniOpMode_Linear : LinearOpMode() {
                     }
                 }
             }
-            // ===========================================================
+            // ---------------------------------------------------------
 
-            // Show the elapsed game time and wheel power.
+            // Telemetry gives all of the data about the hardware, etc along with power
             telemetry.addData("Info", "Run Time: $runtime")
             telemetry.addData("Front left/Right", "%4.2f, %4.2f", frontLeftPower, frontRightPower)
             telemetry.addData("Back  left/Right", "%4.2f, %4.2f", backLeftPower, backRightPower)
