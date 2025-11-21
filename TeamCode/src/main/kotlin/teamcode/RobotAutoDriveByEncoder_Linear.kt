@@ -31,6 +31,7 @@ package teamcode
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode
 import com.qualcomm.robotcore.hardware.DcMotor
+import com.qualcomm.robotcore.hardware.Servo
 import com.qualcomm.robotcore.util.ElapsedTime
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
@@ -70,6 +71,8 @@ class RobotAutoDriveByEncoder_Linear : LinearOpMode() {
     private lateinit var backRightDrive: DcMotor
     private lateinit var launcherMotor: DcMotor
     private lateinit var intakeMotor: DcMotor
+    private lateinit var servo: Servo
+
 
 
 
@@ -82,22 +85,32 @@ class RobotAutoDriveByEncoder_Linear : LinearOpMode() {
             backRightDrive = hardwareMap.get(DcMotor::class.java, "back_right")
             launcherMotor = hardwareMap.get(DcMotor::class.java, "launcher_yeet")
             intakeMotor = hardwareMap.get(DcMotor::class.java, "intake_motor")
+            servo = hardwareMap.get(Servo::class.java, "servo_motor")
 
             waitForStart()
 
             val chassis = Chassis(frontLeftDrive, frontRightDrive, backLeftDrive, backRightDrive, this@RobotAutoDriveByEncoder_Linear)
             chassis.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER)
             chassis.setMode(DcMotor.RunMode.RUN_USING_ENCODER)
-            chassis.encoderVert(12.0)
-            while (true) {
-                if (gamepad1.a) {
-                    launch {
+            servo.direction = Servo.Direction.FORWARD
+
+
+            launch {
+                intakeMotor.power = 0.4
+
+                while (true) {
+                    if (gamepad1.a) {
                         launcherMotor.power = 1.0
+                        servo.position = 1.0
                         sleep(1000)
                         launcherMotor.power = 0.0
+                        servo.position = 0.0
                     }
                 }
             }
+
+
+            chassis.encoderVert(12.0)
         }
     }
 

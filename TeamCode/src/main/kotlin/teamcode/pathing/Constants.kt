@@ -12,18 +12,20 @@ import com.qualcomm.robotcore.hardware.HardwareMap
 
 object Constants {
     val followerConstants = FollowerConstants()
-        .mass(4.0);
+        .mass(8.6);
     val localizerConstants = DriveEncoderConstants()
         .rightFrontMotorName("front_right")
         .leftFrontMotorName("front_left")
         .rightRearMotorName("back_right")
         .leftRearMotorName("back_left")
-        .leftFrontEncoderDirection(Encoder.FORWARD)
+        .leftFrontEncoderDirection(Encoder.REVERSE)
         .rightFrontEncoderDirection(Encoder.FORWARD)
         .leftRearEncoderDirection(Encoder.FORWARD)
-        .rightRearEncoderDirection(Encoder.FORWARD)
+        .rightRearEncoderDirection(Encoder.REVERSE)
         .robotWidth(17.5).robotLength(17.5)
-        .forwardTicksToInches(0.3);
+        .forwardTicksToInches(0.011)
+        .strafeTicksToInches(1.697);
+
     val driveConstants = MecanumConstants()
         .maxPower(1.0)
         .rightFrontMotorName("front_right")
@@ -32,8 +34,8 @@ object Constants {
         .leftRearMotorName("back_left")
         .leftFrontMotorDirection(DcMotorSimple.Direction.REVERSE)
         .rightFrontMotorDirection(DcMotorSimple.Direction.FORWARD)
-        .leftRearMotorDirection(DcMotorSimple.Direction.REVERSE)
-        .rightRearMotorDirection(DcMotorSimple.Direction.FORWARD);
+        .leftRearMotorDirection(DcMotorSimple.Direction.FORWARD)
+        .rightRearMotorDirection(DcMotorSimple.Direction.REVERSE)
     val pathConstraints = PathConstraints(0.99, 100.0, 1.0, 1.0);
 
     fun createFollower(hardwareMap: HardwareMap): Follower = FollowerBuilder(followerConstants, hardwareMap)
