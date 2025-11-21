@@ -23,9 +23,9 @@ object Constants {
         .leftRearEncoderDirection(Encoder.FORWARD)
         .rightRearEncoderDirection(Encoder.REVERSE)
         .robotWidth(17.5).robotLength(17.5)
-        .forwardTicksToInches(0.177)
-        .strafeTicksToInches(0.608)
-        .turnTicksToInches(5.787);
+        .forwardTicksToInches(0.018)
+        .strafeTicksToInches(1.17)
+        .turnTicksToInches(-1.43);
 
     val driveConstants = MecanumConstants()
         .maxPower(1.0)
@@ -37,6 +37,7 @@ object Constants {
         .rightFrontMotorDirection(DcMotorSimple.Direction.FORWARD)
         .leftRearMotorDirection(DcMotorSimple.Direction.FORWARD)
         .rightRearMotorDirection(DcMotorSimple.Direction.REVERSE)
+
     val pathConstraints = PathConstraints(0.99, 100.0, 1.0, 1.0);
 
     fun createFollower(hardwareMap: HardwareMap): Follower = FollowerBuilder(followerConstants, hardwareMap)
