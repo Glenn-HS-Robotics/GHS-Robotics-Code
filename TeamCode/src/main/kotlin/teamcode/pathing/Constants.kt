@@ -23,8 +23,9 @@ object Constants {
         .leftRearEncoderDirection(Encoder.FORWARD)
         .rightRearEncoderDirection(Encoder.REVERSE)
         .robotWidth(17.5).robotLength(17.5)
-        .forwardTicksToInches(0.011)
-        .strafeTicksToInches(1.697);
+        .forwardTicksToInches(0.177)
+        .strafeTicksToInches(0.608)
+        .turnTicksToInches(5.787);
 
     val driveConstants = MecanumConstants()
         .maxPower(1.0)
