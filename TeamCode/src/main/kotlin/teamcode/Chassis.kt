@@ -5,6 +5,7 @@ import com.qualcomm.robotcore.hardware.DcMotor
 import com.qualcomm.robotcore.hardware.DcMotor.RunMode
 import com.qualcomm.robotcore.hardware.DcMotorSimple
 import com.qualcomm.robotcore.util.ElapsedTime
+import kotlin.math.PI
 import kotlin.math.abs
 import kotlin.math.max
 
@@ -38,7 +39,48 @@ class Chassis(private val frontLeft: DcMotor, private val frontRight: DcMotor, p
         backRight.targetPosition = newTarget
         setMode(RunMode.RUN_TO_POSITION)
 
-        power(0.6)
+        power(0.3)
+
+        // keep looping while we are still active, and there is time left, and both motors are running.
+        // Note: We use (isBusy() && isBusy()) in the loop test, which means that when EITHER motor hits
+        // its target position, the motion will stop.  This is "safer" in the event that the robot will
+        // always end the motion as soon as possible.
+        // However, if you require that BOTH motors have finished their moves before the robot continues
+        // onto the next step, use (isBusy() || isBusy()) in the loop test.
+        while (instance.opModeIsActive() && frontLeft.isBusy && frontRight.isBusy) {
+
+            // Display it for the driver.
+            instance.telemetry.addData("Running to", " %7d", newTarget )
+            instance.telemetry.addData(
+                "Currently at", " at front: %7d  back: %7d",
+                frontLeft.currentPosition, backRight.currentPosition
+            )
+            instance.telemetry.update()
+        }
+        stop()
+        setMode(RunMode.RUN_USING_ENCODER)
+        instance.telemetry.addData("Path", "Complete")
+        instance.telemetry.update()
+        instance.sleep(100)
+
+    }
+
+    fun encoderDiagonal(inches: Double, right: Boolean){
+
+        // Determine new target position, and pass to motor controller
+        val newTarget = if(right) frontRight.currentPosition else frontLeft.currentPosition + (inches * COUNTS_PER_INCH).toInt()
+
+        if (right) {
+            frontLeft.targetPosition = newTarget
+            backRight.targetPosition = newTarget
+        } else {
+            frontRight.targetPosition = newTarget
+            backLeft.targetPosition = newTarget
+        }
+
+        setMode(RunMode.RUN_TO_POSITION)
+
+        power(0.3)
 
         // keep looping while we are still active, and there is time left, and both motors are running.
         // Note: We use (isBusy() && isBusy()) in the loop test, which means that when EITHER motor hits
@@ -99,6 +141,61 @@ class Chassis(private val frontLeft: DcMotor, private val frontRight: DcMotor, p
         instance.sleep(100)
 
     }
+
+    /**
+     * Rotates the robot a set amount of radians using motor encoders.
+     * Positive radians is counter-clockwise (left), negative is clockwise (right).
+     */
+    fun encoderRotationRadians(radians: Double, power: Double) {
+        // Circumference of the circle traced by the wheels when rotating
+        val trackCircumference = 25.4558  * PI
+
+        // The arc length each side must travel for the given angle
+        // (Angle in radians / 2*PI radians per revolution) * Circumference
+        val inchesToTravel = (radians / (2.0 * PI)) * trackCircumference
+
+        // Determine target encoder position (left wheels forward, right wheels backward for CCW rotation)
+        val targetCounts = (inchesToTravel * COUNTS_PER_INCH).toInt()
+
+        val newFrontLeftTarget = frontLeft.currentPosition + targetCounts
+        val newBackLeftTarget = backLeft.currentPosition + targetCounts
+        val newFrontRightTarget = frontRight.currentPosition - targetCounts // Reverse direction
+        val newBackRightTarget = backRight.currentPosition - targetCounts   // Reverse direction
+
+        frontLeft.targetPosition = newFrontLeftTarget
+        backLeft.targetPosition = newBackLeftTarget
+        frontRight.targetPosition = newFrontRightTarget
+        backRight.targetPosition = newBackRightTarget
+
+        setMode(RunMode.RUN_TO_POSITION)
+
+        // Set power for all motors
+        val rotationPower = abs(power) // Use absolute power value
+        frontLeft.power = rotationPower
+        backLeft.power = rotationPower
+        frontRight.power = rotationPower
+        backRight.power = rotationPower
+
+        // Keep looping while we are still active and all motors are running
+        while (instance.opModeIsActive() &&
+            frontLeft.isBusy && frontRight.isBusy &&
+            backLeft.isBusy && backRight.isBusy) {
+
+            // Display telemetry
+            instance.telemetry.addData("Rotating to Target Counts", targetCounts)
+            instance.telemetry.addData("Currently at FL", frontLeft.currentPosition)
+            instance.telemetry.addData("Currently at FR", frontRight.currentPosition)
+            instance.telemetry.update()
+        }
+
+        // Stop all motion and reset modes
+        stop()
+        setMode(RunMode.RUN_USING_ENCODER)
+        instance.telemetry.addData("Path", "Rotation Complete")
+        instance.telemetry.update()
+        instance.sleep(100)
+    }
+
 
     fun vert(power: Double){
         figureOutPower(power, 0.0, 0.0)
