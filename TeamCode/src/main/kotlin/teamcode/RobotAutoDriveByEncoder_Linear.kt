@@ -83,7 +83,7 @@ class RobotAutoDriveByEncoder_Linear : LinearOpMode() {
             backLeftDrive = hardwareMap.get(DcMotor::class.java, "back_left")
             frontRightDrive = hardwareMap.get(DcMotor::class.java, "front_right")
             backRightDrive = hardwareMap.get(DcMotor::class.java, "back_right")
-            launcherMotor = hardwareMap.get(DcMotor::class.java, "launcher_yeet")
+            launcherMotor = hardwareMap.get(DcMotor::class.java, "launcher")
             intakeMotor = hardwareMap.get(DcMotor::class.java, "intake_motor")
             servo = hardwareMap.get(Servo::class.java, "servo_motor")
 

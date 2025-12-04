@@ -28,6 +28,7 @@
  */
 package teamcode
 
+import android.media.MediaPlayer
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode
 import com.qualcomm.robotcore.hardware.DcMotor
@@ -36,6 +37,7 @@ import com.qualcomm.robotcore.util.ElapsedTime
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
+import org.firstinspires.ftc.teamcode.R
 import kotlin.math.PI
 
 /*
@@ -74,6 +76,8 @@ class RobotAutoDriveByEncoder_BlueBack : LinearOpMode() {
     private lateinit var intakeMotor: DcMotor
     private lateinit var servo: Servo
 
+    var mediaPlayer: MediaPlayer? = null
+
 
 
 
@@ -84,7 +88,7 @@ class RobotAutoDriveByEncoder_BlueBack : LinearOpMode() {
             backLeftDrive = hardwareMap.get(DcMotor::class.java, "back_left")
             frontRightDrive = hardwareMap.get(DcMotor::class.java, "front_right")
             backRightDrive = hardwareMap.get(DcMotor::class.java, "back_right")
-            launcherMotor = hardwareMap.get(DcMotor::class.java, "launcher_yeet")
+            launcherMotor = hardwareMap.get(DcMotor::class.java, "launcher")
             intakeMotor = hardwareMap.get(DcMotor::class.java, "intake_motor")
             servo = hardwareMap.get(Servo::class.java, "servo_motor")
 
@@ -94,12 +98,10 @@ class RobotAutoDriveByEncoder_BlueBack : LinearOpMode() {
             chassis.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER)
             chassis.setMode(DcMotor.RunMode.RUN_USING_ENCODER)
             servo.direction = Servo.Direction.FORWARD
-
+            intakeMotor.power = -0.6
 
             launch {
-                intakeMotor.power = 0.4
-
-                while (true) {
+                while (opModeIsActive()) {
                     if (gamepad1.a) {
                         launcherMotor.power = 1.0
                         servo.position = 1.0
@@ -109,28 +111,32 @@ class RobotAutoDriveByEncoder_BlueBack : LinearOpMode() {
                     }
                 }
             }
-
-
+            chassis.encoderHoris(-2.0)
             chassis.encoderVert(36.0)
             chassis.encoderDiagonal(-42.0, true)
-            chassis.encoderRotationRadians(-3*PI/4, 0.3)
+            chassis.encoderRotationRadians((3*PI)/4, 0.4)
+
+            sleep(1000)
+            servo.position = 0.5
+            sleep(1000)
+            servo.position = 1.0
+
+            chassis.encoderRotationRadians(PI/4.1, 0.4)
+            chassis.encoderVert(-26.0)
+
+
+
+
+
+
+
+//            launcherMotor.power = 1.0
+//            servo.position = 1.0
+//            sleep(1000)
+//            launcherMotor.power = 0.0
+//            servo.position = 0.0
 
         }
     }
 
-    companion object {
-        // Calculate the COUNTS_PER_INCH for your specific drive train.
-        // Go to your motor vendor website to determine your motor's COUNTS_PER_MOTOR_REV
-        // For external drive gearing, set DRIVE_GEAR_REDUCTION as needed.
-        // For example, use a value of 2.0 for a 12-tooth spur gear driving a 24-tooth spur gear.
-        // This is gearing DOWN for less speed and more torque.
-        // For gearing UP, use a gear ratio less than 1.0. Note this will affect the direction of wheel rotation.
-        const val COUNTS_PER_MOTOR_REV = 537.5 // eg: TETRIX Motor Encoder
-        const val DRIVE_GEAR_REDUCTION = 1.0 // No External Gearing.
-        const val WHEEL_DIAMETER_INCHES = 4.09 // For figuring circumference
-        const val COUNTS_PER_INCH = COUNTS_PER_MOTOR_REV * DRIVE_GEAR_REDUCTION /
-                (WHEEL_DIAMETER_INCHES * 3.1415)
-        const val DRIVE_SPEED = 0.6
-        const val TURN_SPEED = 0.5
-    }
 }

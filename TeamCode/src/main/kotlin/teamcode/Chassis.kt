@@ -9,7 +9,7 @@ import kotlin.math.PI
 import kotlin.math.abs
 import kotlin.math.max
 
-const val COUNTS_PER_MOTOR_REV = 2150.4
+const val COUNTS_PER_MOTOR_REV = 460.27
 
 const val DRIVE_GEAR_REDUCTION = 1.0
 
@@ -22,24 +22,24 @@ class Chassis(private val frontLeft: DcMotor, private val frontRight: DcMotor, p
     val runtime = ElapsedTime()
 
     init {
-        frontLeft!!.direction = DcMotorSimple.Direction.REVERSE
-        backLeft!!.direction = DcMotorSimple.Direction.REVERSE
-        frontRight!!.direction = DcMotorSimple.Direction.FORWARD
-        backRight!!.direction = DcMotorSimple.Direction.FORWARD
+        frontLeft.direction = DcMotorSimple.Direction.REVERSE
+        backLeft.direction = DcMotorSimple.Direction.REVERSE
+        frontRight.direction = DcMotorSimple.Direction.FORWARD
+        backRight.direction = DcMotorSimple.Direction.FORWARD
         setMode(RunMode.RUN_USING_ENCODER)
     }
 
     fun encoderVert(inches: Double){
 
         // Determine new target position, and pass to motor controller
-        val newTarget = frontLeft.currentPosition + (inches * COUNTS_PER_INCH).toInt()
-        frontLeft.targetPosition = newTarget
-        frontRight.targetPosition = newTarget
-        backLeft.targetPosition = newTarget
-        backRight.targetPosition = newTarget
+        val newTarget = (inches * COUNTS_PER_INCH).toInt()
+        frontLeft.targetPosition = newTarget + frontLeft.currentPosition
+        frontRight.targetPosition = newTarget + frontRight.currentPosition
+        backLeft.targetPosition = newTarget + backLeft.currentPosition
+        backRight.targetPosition = newTarget + backRight.currentPosition
         setMode(RunMode.RUN_TO_POSITION)
 
-        power(0.3)
+        power(0.75)
 
         // keep looping while we are still active, and there is time left, and both motors are running.
         // Note: We use (isBusy() && isBusy()) in the loop test, which means that when EITHER motor hits
@@ -47,7 +47,7 @@ class Chassis(private val frontLeft: DcMotor, private val frontRight: DcMotor, p
         // always end the motion as soon as possible.
         // However, if you require that BOTH motors have finished their moves before the robot continues
         // onto the next step, use (isBusy() || isBusy()) in the loop test.
-        while (instance.opModeIsActive() && frontLeft.isBusy && frontRight.isBusy) {
+        while (instance.opModeIsActive() && frontLeft.isBusy && frontRight.isBusy && backLeft.isBusy && backRight.isBusy) {
 
             // Display it for the driver.
             instance.telemetry.addData("Running to", " %7d", newTarget )
@@ -61,26 +61,26 @@ class Chassis(private val frontLeft: DcMotor, private val frontRight: DcMotor, p
         setMode(RunMode.RUN_USING_ENCODER)
         instance.telemetry.addData("Path", "Complete")
         instance.telemetry.update()
-        instance.sleep(100)
+        instance.sleep(50)
 
     }
 
     fun encoderDiagonal(inches: Double, right: Boolean){
 
         // Determine new target position, and pass to motor controller
-        val newTarget = if(right) frontRight.currentPosition else frontLeft.currentPosition + (inches * COUNTS_PER_INCH).toInt()
+        val counts = (inches * COUNTS_PER_INCH).toInt()
 
         if (right) {
-            frontLeft.targetPosition = newTarget
-            backRight.targetPosition = newTarget
+            frontLeft.targetPosition = frontLeft.currentPosition + counts
+            backRight.targetPosition = backRight.currentPosition + counts
         } else {
-            frontRight.targetPosition = newTarget
-            backLeft.targetPosition = newTarget
+            frontRight.targetPosition = frontLeft.currentPosition + counts
+            backLeft.targetPosition = backRight.currentPosition + counts
         }
 
         setMode(RunMode.RUN_TO_POSITION)
 
-        power(0.3)
+        power(0.9)
 
         // keep looping while we are still active, and there is time left, and both motors are running.
         // Note: We use (isBusy() && isBusy()) in the loop test, which means that when EITHER motor hits
@@ -88,15 +88,26 @@ class Chassis(private val frontLeft: DcMotor, private val frontRight: DcMotor, p
         // always end the motion as soon as possible.
         // However, if you require that BOTH motors have finished their moves before the robot continues
         // onto the next step, use (isBusy() || isBusy()) in the loop test.
-        while (instance.opModeIsActive() && frontLeft.isBusy && frontRight.isBusy) {
-
-            // Display it for the driver.
-            instance.telemetry.addData("Running to", " %7d", newTarget )
-            instance.telemetry.addData(
-                "Currently at", " at front: %7d  back: %7d",
-                frontLeft.currentPosition, backRight.currentPosition
-            )
-            instance.telemetry.update()
+        if (right) {
+            while (instance.opModeIsActive() && (frontLeft.isBusy || backRight.isBusy)) {
+                // Display it for the driver.
+                instance.telemetry.addData("Running to", " %7d", counts)
+                instance.telemetry.addData(
+                    "Currently at", " at frontLeft: %7d  backRight: %7d",
+                    frontLeft.currentPosition, backRight.currentPosition
+                )
+                instance.telemetry.update()
+            }
+        } else {
+            while (instance.opModeIsActive() && (frontRight.isBusy || backLeft.isBusy)) {
+                // Display it for the driver.
+                instance.telemetry.addData("Running to", " %7d", counts)
+                instance.telemetry.addData(
+                    "Currently at", " at frontRight: %7d  backLeft: %7d",
+                    frontRight.currentPosition, backLeft.currentPosition
+                )
+                instance.telemetry.update()
+            }
         }
         stop()
         setMode(RunMode.RUN_USING_ENCODER)
@@ -116,7 +127,7 @@ class Chassis(private val frontLeft: DcMotor, private val frontRight: DcMotor, p
         backRight.targetPosition = newTarget
         setMode(RunMode.RUN_TO_POSITION)
 
-        power(0.6)
+        power(0.3)
 
         // keep looping while we are still active, and there is time left, and both motors are running.
         // Note: We use (isBusy() && isBusy()) in the loop test, which means that when EITHER motor hits
