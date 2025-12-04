@@ -35,6 +35,7 @@ import com.qualcomm.robotcore.hardware.DcMotor
 import com.qualcomm.robotcore.hardware.Servo
 import com.qualcomm.robotcore.util.ElapsedTime
 import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import org.firstinspires.ftc.teamcode.R
@@ -76,7 +77,7 @@ class RobotAutoDriveByEncoder_BlueBack : LinearOpMode() {
     private lateinit var intakeMotor: DcMotor
     private lateinit var servo: Servo
 
-    var mediaPlayer: MediaPlayer? = null
+    var gamepadBEnabled = false;
 
 
 
@@ -98,43 +99,59 @@ class RobotAutoDriveByEncoder_BlueBack : LinearOpMode() {
             chassis.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER)
             chassis.setMode(DcMotor.RunMode.RUN_USING_ENCODER)
             servo.direction = Servo.Direction.FORWARD
-            intakeMotor.power = -0.6
+            //intakeMotor.power = -0.6
 
             launch {
                 while (opModeIsActive()) {
+                    telemetry.addData("Info", "running A loop")
                     if (gamepad1.a) {
-                        launcherMotor.power = 1.0
+                        telemetry.addData("Info", "pressed A")
+                        telemetry.update()
+                        servo.position = 0.5
+                        delay(3000)
                         servo.position = 1.0
-                        sleep(1000)
-                        launcherMotor.power = 0.0
-                        servo.position = 0.0
                     }
+                    delay(10)
                 }
             }
+            launch {
+                while (opModeIsActive()) {
+                    telemetry.addData("Info", "running B loop")
+                    if(gamepad1.b != gamepadBEnabled) {
+                        gamepadBEnabled = gamepad1.b
+                        launcherMotor.power = if (gamepad1.b) 1.0 else 0.0
+                        telemetry.addData("Info", "pressing B ${gamepad1.b}")
+                        telemetry.update()
+                    }
+                    delay(10)
+                }
+            }
+
+            while(opModeIsActive()){
+                telemetry.update()
+                delay(50)
+            }
+
             chassis.encoderHoris(-2.0)
             chassis.encoderVert(36.0)
             chassis.encoderDiagonal(-42.0, true)
             chassis.encoderRotationRadians((3*PI)/4, 0.4)
-
-            sleep(1000)
             servo.position = 0.5
-            sleep(1000)
+            launcherMotor.power = 1.0
+            sleep(3000)
             servo.position = 1.0
+            sleep(1000)
+            launcherMotor.power = 0.0
 
             chassis.encoderRotationRadians(PI/4.1, 0.4)
             chassis.encoderVert(-26.0)
 
 
-
-
-
-
-
-//            launcherMotor.power = 1.0
-//            servo.position = 1.0
-//            sleep(1000)
-//            launcherMotor.power = 0.0
-//            servo.position = 0.0
+            launcherMotor.power = 1.0
+            servo.position = 1.0
+            sleep(1000)
+            launcherMotor.power = 0.0
+            servo.position = 0.0
 
         }
     }
