@@ -33,6 +33,7 @@ import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp
 import com.qualcomm.robotcore.hardware.DcMotor
 import com.qualcomm.robotcore.hardware.DcMotorSimple
+import com.qualcomm.robotcore.hardware.Servo
 import com.qualcomm.robotcore.util.Range
 import org.firstinspires.ftc.robotcore.external.hardware.camera.BuiltinCameraDirection
 import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName
@@ -106,10 +107,26 @@ class RobotAutoDriveToAprilTagOmni : LinearOpMode() {
     val MAX_AUTO_TURN: Double =
         0.3 //  Clip the turn speed to this max value (adjust for your robot)
 
+    val LAUNCHER_POWER: Double = 1.0
+    val INTAKE_POWER: Double = 1.0
+
+    val OPEN_POS: Double = 0.5
+    val PUSH_POS: Double = 1.0
+
     private var frontLeftDrive: DcMotor? = null //  Used to control the left front drive wheel
     private var frontRightDrive: DcMotor? = null //  Used to control the right front drive wheel
     private var backLeftDrive: DcMotor? = null //  Used to control the left back drive wheel
     private var backRightDrive: DcMotor? = null //  Used to control the right back drive wheel
+
+    private var launchMotor: DcMotor? = null
+
+    private var intakeMotor:DcMotor? = null
+
+    private var pusher: Servo? = null
+    var launcherEnabled = false
+    var intakeEnabled = false
+
+    var launcherOpen = false
 
     private var visionPortal: VisionPortal? = null // Used to manage the video source.
     private var aprilTag: AprilTagProcessor? =
@@ -133,6 +150,10 @@ class RobotAutoDriveToAprilTagOmni : LinearOpMode() {
         backLeftDrive = hardwareMap.get(DcMotor::class.java, "back_left")
         frontRightDrive = hardwareMap.get(DcMotor::class.java, "front_right")
         backRightDrive = hardwareMap.get(DcMotor::class.java, "back_right")
+        intakeMotor = hardwareMap.get(DcMotor::class.java, "intake_motor")
+        pusher = hardwareMap.get(Servo::class.java, "servo_motor")
+        launchMotor = hardwareMap.get(DcMotor::class.java, "launcher")
+
 
         // To drive forward, most robots need the motor on one side to be reversed, because the axles point in opposite directions.
         // When run, this OpMode should start both motors driving forward. So adjust these two lines based on your first test drive.
@@ -141,6 +162,9 @@ class RobotAutoDriveToAprilTagOmni : LinearOpMode() {
         backLeftDrive!!.setDirection(DcMotorSimple.Direction.REVERSE)
         frontRightDrive!!.setDirection(DcMotorSimple.Direction.FORWARD)
         backRightDrive!!.setDirection(DcMotorSimple.Direction.FORWARD)
+
+        launchMotor!!.direction = DcMotorSimple.Direction.REVERSE
+        intakeMotor!!.direction = DcMotorSimple.Direction.REVERSE
 
         if (USE_WEBCAM) setManualExposure(1, 100) // Use low exposure time to reduce motion blur
 
@@ -226,6 +250,28 @@ class RobotAutoDriveToAprilTagOmni : LinearOpMode() {
                     turn
                 )
             }
+
+            if (gamepad2.b){
+                launcherEnabled = !launcherEnabled
+            }
+
+            if (gamepad2.a){
+                intakeEnabled = !intakeEnabled
+            }
+
+            if (gamepad2.x){
+                launcherOpen = !launcherOpen
+            }
+
+            pusher!!.position = if(launcherOpen) OPEN_POS else PUSH_POS
+
+            intakeMotor!!.power = if(intakeEnabled) INTAKE_POWER else 0.0
+
+            launchMotor!!.power = if(launcherEnabled) LAUNCHER_POWER else 0.0
+
+
+
+
             telemetry.update()
 
             // Apply desired axes motions to the drivetrain.

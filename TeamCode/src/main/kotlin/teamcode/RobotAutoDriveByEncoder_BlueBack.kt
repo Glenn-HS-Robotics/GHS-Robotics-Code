@@ -104,8 +104,6 @@ class RobotAutoDriveByEncoder_BlueBack : LinearOpMode() {
     private var desiredTag: AprilTagDetection? =
         null // Used to hold the data for a detected AprilTag
 
-    var gamepadBEnabled = false;
-
 
     override fun runOpMode() {
         var targetFound = false // Set to true when an AprilTag target is detected
