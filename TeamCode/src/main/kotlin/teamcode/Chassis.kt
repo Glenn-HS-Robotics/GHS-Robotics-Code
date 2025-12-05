@@ -246,7 +246,7 @@ class Chassis(private val frontLeft: DcMotor, private val frontRight: DcMotor, p
         }
     }
 
-    private fun figureOutPower(axial: Double, lateral: Double, yaw: Double){
+    fun figureOutPower(axial: Double, lateral: Double, yaw: Double){
         var frontLeftPower = axial + lateral + yaw
         var frontRightPower = axial - lateral - yaw
         var backLeftPower = axial - lateral + yaw

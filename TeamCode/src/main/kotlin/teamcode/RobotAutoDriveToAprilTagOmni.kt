@@ -87,8 +87,7 @@ import kotlin.math.max
 @TeleOp(name = "Omni Drive To AprilTag", group = "Concept")
 class RobotAutoDriveToAprilTagOmni : LinearOpMode() {
     // Adjust these numbers to suit your robot.
-    val DESIRED_DISTANCE: Double =
-        48.0 //  this is how close the camera should get to the target (inches)
+    val DESIRED_DISTANCE: Double = 36.0 //  this is how close the camera should get to the target (inches)
 
     //  Set the GAIN constants to control the relationship between the measured position error, and how much power is
     //  applied to the drive motors to correct the error.
