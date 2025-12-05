@@ -166,11 +166,14 @@ class RobotAutoDriveToAprilTagOmni : LinearOpMode() {
                         targetFound = true
                         desiredTag = detection
                         break // don't look any further.
-                    } else {
+                    }
+
+                    else {
                         // This tag is in the library, but we do not want to track it right now.
                         telemetry.addData("Skipping", "Tag ID %d is not desired", detection.id)
                     }
-                } else {
+                }
+                else {
                     // This tag is NOT in the library, so we don't have enough information to track to it.
                     telemetry.addData("Unknown", "Tag ID %d is not in TagLibrary", detection.id)
                 }
@@ -188,7 +191,9 @@ class RobotAutoDriveToAprilTagOmni : LinearOpMode() {
                 telemetry.addData("Range", "%5.1f inches", desiredTag!!.ftcPose.range)
                 telemetry.addData("Bearing", "%3.0f degrees", desiredTag!!.ftcPose.bearing)
                 telemetry.addData("Yaw", "%3.0f degrees", desiredTag!!.ftcPose.yaw)
-            } else {
+            }
+
+            else {
                 telemetry.addData("\n>", "Drive using joysticks to find valid target\n")
             }
 
@@ -212,7 +217,9 @@ class RobotAutoDriveToAprilTagOmni : LinearOpMode() {
                     strafe,
                     turn
                 )
-            } else {
+            }
+
+            else {
                 // drive using manual POV Joystick mode.  Slow things down to make the robot more controlable.
 
                 drive = -gamepad1.left_stick_y / 2.0 // Reduce drive rate to 50%.
