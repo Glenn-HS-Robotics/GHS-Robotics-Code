@@ -301,7 +301,9 @@ class RobotAutoDriveToAprilTagOmni : LinearOpMode() {
                 .setCamera(hardwareMap.get<WebcamName?>(WebcamName::class.java, "Webcam 1"))
                 .addProcessor(aprilTag)
                 .build()
-        } else {
+        }
+
+        else {
             visionPortal = VisionPortal.Builder()
                 .setCamera(BuiltinCameraDirection.BACK)
                 .addProcessor(aprilTag)
