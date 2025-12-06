@@ -5,9 +5,9 @@ import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp
 import com.qualcomm.robotcore.hardware.DcMotor
 import com.qualcomm.robotcore.hardware.DcMotorSimple
+import com.qualcomm.robotcore.hardware.Servo
 import com.qualcomm.robotcore.util.ElapsedTime
 import kotlin.math.abs
-import com.qualcomm.robotcore.hardware.Servo
 import kotlin.math.max
 
 @Suppress("unused")
@@ -53,7 +53,7 @@ class BasicOmniOpModeEncoder_Linear : LinearOpMode() {
         backRightDrive!!.direction = DcMotorSimple.Direction.FORWARD
 
         launchMoto!!.direction = DcMotorSimple.Direction.REVERSE
-        intakeRuns!!.direction = DcMotorSimple.Direction.REVERSE
+        intakeRuns!!.direction = DcMotorSimple.Direction.FORWARD
 
         telemetry.addData("Status", "Initialized")
         telemetry.update()
