@@ -33,6 +33,7 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp
 import com.qualcomm.robotcore.hardware.DcMotor
 import com.qualcomm.robotcore.hardware.DcMotorSimple
 import com.qualcomm.robotcore.hardware.Servo
+import com.qualcomm.robotcore.util.ElapsedTime
 import com.qualcomm.robotcore.util.Range
 import org.firstinspires.ftc.robotcore.external.hardware.camera.BuiltinCameraDirection
 import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName
@@ -41,6 +42,7 @@ import org.firstinspires.ftc.robotcore.external.hardware.camera.controls.GainCon
 import org.firstinspires.ftc.vision.VisionPortal
 import org.firstinspires.ftc.vision.apriltag.AprilTagDetection
 import org.firstinspires.ftc.vision.apriltag.AprilTagProcessor
+import teamcode.BasicOmniOpModeEncoder_Linear.KickState
 import java.util.concurrent.TimeUnit
 import kotlin.math.abs
 import kotlin.math.max
@@ -107,10 +109,12 @@ class RobotAutoDriveToAprilTagOmni : LinearOpMode() {
         0.3 //  Clip the turn speed to this max value (adjust for your robot)
 
     val LAUNCHER_POWER: Double = 1.0
-    val INTAKE_POWER: Double = 1.0
+    val INTAKE_POWER: Double = -1.0
 
-    val OPEN_POS: Double = 0.5
-    val PUSH_POS: Double = 1.0
+    private val REST_POS = 1.0
+
+    private val KICK_POS = 0.5
+    private val KICK_TIME_MS = 1500
 
     private var frontLeftDrive: DcMotor? = null //  Used to control the left front drive wheel
     private var frontRightDrive: DcMotor? = null //  Used to control the right front drive wheel
@@ -121,11 +125,16 @@ class RobotAutoDriveToAprilTagOmni : LinearOpMode() {
 
     private var intakeMotor:DcMotor? = null
 
+    private enum class KickState { IDLE, EXTENDING, RETRACTING }
+    private var kickState = KickState.IDLE
+    private val phaseTimer = ElapsedTime()
+
     private var pusher: Servo? = null
     var launcherEnabled = false
     var intakeEnabled = false
 
     var launcherOpen = false
+    var launcherTimer: ElapsedTime? = null
 
     private var visionPortal: VisionPortal? = null // Used to manage the video source.
     private var aprilTag: AprilTagProcessor? =
@@ -152,6 +161,12 @@ class RobotAutoDriveToAprilTagOmni : LinearOpMode() {
         intakeMotor = hardwareMap.get(DcMotor::class.java, "intake_motor")
         pusher = hardwareMap.get(Servo::class.java, "servo_motor")
         launchMotor = hardwareMap.get(DcMotor::class.java, "launcher")
+
+        var launcherEnabled = false
+        var prevB = false
+        var intakeEnabled = false
+        var prevA = false
+        var prevX = false
 
 
         // To drive forward, most robots need the motor on one side to be reversed, because the axles point in opposite directions.
@@ -265,11 +280,26 @@ class RobotAutoDriveToAprilTagOmni : LinearOpMode() {
                 intakeEnabled = !intakeEnabled
             }
 
-            if (gamepad2.x){
-                launcherOpen = !launcherOpen
-            }
+            val xNow = gamepad2.x
 
-            pusher!!.position = if(launcherOpen) OPEN_POS else PUSH_POS
+            if (xNow && !prevX && kickState == KickState.IDLE) {
+                pusher!!.position = KICK_POS
+                phaseTimer.reset()
+                kickState = KickState.EXTENDING
+            }
+            prevX = xNow
+
+            // <<< ADDED: servo state machine for timed retract
+            when (kickState) {
+                KickState.EXTENDING -> {
+                    if (phaseTimer.milliseconds() >= KICK_TIME_MS.toDouble()) {
+                        pusher!!.position = REST_POS       // <<< ADDED
+                        kickState = KickState.IDLE          // <<< ADDED
+                    }
+                }
+                else -> {}
+            }
+            // <<< END ADDED SECTION
 
             intakeMotor!!.power = if(intakeEnabled) INTAKE_POWER else 0.0
 

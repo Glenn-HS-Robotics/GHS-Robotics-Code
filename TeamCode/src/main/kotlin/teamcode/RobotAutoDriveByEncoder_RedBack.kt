@@ -66,8 +66,8 @@ import kotlin.math.PI
  * Use Android Studio to Copy this Class, and Paste it into your team's code folder with a new name.
  * Remove or comment out the @Disabled line to add this OpMode to the Driver Station OpMode list
  */
-@Autonomous(name = "Auto Drive By Encoder Blue Back", group = "Robot")
-class RobotAutoDriveByEncoder_BlueBack : LinearOpMode() {
+@Autonomous(name = "Auto Drive By Encoder Red Back", group = "Robot")
+class RobotAutoDriveByEncoder_RedBack : LinearOpMode() {
     /* Declare OpMode members. */
     private lateinit var frontLeftDrive: DcMotor
     private lateinit var backLeftDrive: DcMotor
@@ -78,6 +78,8 @@ class RobotAutoDriveByEncoder_BlueBack : LinearOpMode() {
     private lateinit var servo: Servo
 
     var gamepadBEnabled = false;
+
+
 
 
     override fun runOpMode() {
@@ -93,7 +95,7 @@ class RobotAutoDriveByEncoder_BlueBack : LinearOpMode() {
 
             waitForStart()
 
-            val chassis = Chassis(frontLeftDrive, frontRightDrive, backLeftDrive, backRightDrive, this@RobotAutoDriveByEncoder_BlueBack)
+            val chassis = Chassis(frontLeftDrive, frontRightDrive, backLeftDrive, backRightDrive, this@RobotAutoDriveByEncoder_RedBack)
             chassis.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER)
             chassis.setMode(DcMotor.RunMode.RUN_USING_ENCODER)
             servo.direction = Servo.Direction.FORWARD
@@ -130,10 +132,10 @@ class RobotAutoDriveByEncoder_BlueBack : LinearOpMode() {
 //                delay(50)
 //            }
 
-            chassis.encoderHoris(-2.0)
+            chassis.encoderHoris(2.0)
             chassis.encoderVert(36.0)
-            chassis.encoderDiagonal(-42.0, true)
-            chassis.encoderRotationRadians((3*PI)/4, 0.4)
+            chassis.encoderDiagonal(-42.0, false)// could be wrong
+            chassis.encoderRotationRadians(-(3*PI)/4, 0.4)
             servo.position = 0.5
             launcherMotor.power = 1.0
             sleep(3000)
@@ -141,7 +143,7 @@ class RobotAutoDriveByEncoder_BlueBack : LinearOpMode() {
             sleep(1000)
             launcherMotor.power = 0.0
 
-            chassis.encoderRotationRadians(PI/4.1, 0.4)
+            chassis.encoderRotationRadians(-PI/4.1, 0.4)
             chassis.encoderVert(-26.0)
 
 
