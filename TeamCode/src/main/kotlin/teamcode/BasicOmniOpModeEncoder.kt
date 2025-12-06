@@ -66,6 +66,11 @@ class BasicOmniOpModeEncoder_Linear : LinearOpMode() {
         backLeftDrive!!.mode = DcMotor.RunMode.STOP_AND_RESET_ENCODER
         backRightDrive!!.mode = DcMotor.RunMode.STOP_AND_RESET_ENCODER
 
+        frontLeftDrive!!.mode = DcMotor.RunMode.RUN_USING_ENCODER
+        frontRightDrive!!.mode = DcMotor.RunMode.RUN_USING_ENCODER
+        backLeftDrive!!.mode = DcMotor.RunMode.RUN_USING_ENCODER
+        backRightDrive!!.mode = DcMotor.RunMode.RUN_USING_ENCODER
+
         var launcherEnabled = false
         var prevB = false
         var intakeEnabled = false
