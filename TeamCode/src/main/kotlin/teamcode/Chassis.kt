@@ -29,7 +29,7 @@ class Chassis(private val frontLeft: DcMotor, private val frontRight: DcMotor, p
         setMode(RunMode.RUN_USING_ENCODER)
     }
 
-    fun encoderVert(inches: Double){
+    fun encoderVert(inches: Double, power: Double =0.75){
 
         // Determine new target position, and pass to motor controller
         val newTarget = (inches * COUNTS_PER_INCH).toInt()
@@ -39,7 +39,7 @@ class Chassis(private val frontLeft: DcMotor, private val frontRight: DcMotor, p
         backRight.targetPosition = newTarget + backRight.currentPosition
         setMode(RunMode.RUN_TO_POSITION)
 
-        power(0.75)
+        power(power)
 
         // keep looping while we are still active, and there is time left, and both motors are running.
         // Note: We use (isBusy() && isBusy()) in the loop test, which means that when EITHER motor hits

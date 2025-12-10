@@ -130,15 +130,26 @@ class RobotAutoDriveByEncoder_BlueBack : LinearOpMode() {
 //                delay(50)
 //            }
 
-            chassis.encoderHoris(-2.0)
-            chassis.encoderVert(36.0)
+            chassis.encoderHoris(-1.0)
+            chassis.encoderVert(25.0)
+            chassis.encoderVert(11.0, 0.2)
             chassis.encoderDiagonal(-42.0, true)
+            intakeMotor.power = 0.0
             chassis.encoderRotationRadians((3*PI)/4, 0.4)
-            servo.position = 0.5
             launcherMotor.power = 1.0
-            sleep(3000)
-            servo.position = 1.0
             sleep(1000)
+            //open ball 1
+            servo.position = 0.5
+            //start launcher
+            sleep(3000)
+            //close
+            servo.position = 1.0
+            sleep(2000)
+            //open ball 2
+            servo.position = 0.5
+            sleep(3000)
+            //close
+            servo.position = 1.0
             launcherMotor.power = 0.0
 
             chassis.encoderRotationRadians(PI/4.1, 0.4)
