@@ -180,7 +180,7 @@ class RobotAutoDriveToAprilTagOmni : LinearOpMode() {
         launchMotor!!.direction = DcMotorSimple.Direction.REVERSE
         intakeMotor!!.direction = DcMotorSimple.Direction.REVERSE
 
-        if (USE_WEBCAM) setManualExposure(1, 100) // Use low exposure time to reduce motion blur
+        if (USE_WEBCAM) setManualExposure(10, 100) // Use low exposure time to reduce motion blur
 
 
         // Wait for driver to press start

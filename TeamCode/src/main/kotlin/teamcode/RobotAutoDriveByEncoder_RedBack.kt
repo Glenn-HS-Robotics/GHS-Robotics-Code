@@ -28,17 +28,12 @@
  */
 package teamcode
 
-import android.media.MediaPlayer
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode
 import com.qualcomm.robotcore.hardware.DcMotor
+import com.qualcomm.robotcore.hardware.DcMotorSimple
 import com.qualcomm.robotcore.hardware.Servo
-import com.qualcomm.robotcore.util.ElapsedTime
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
-import org.firstinspires.ftc.teamcode.R
 import kotlin.math.PI
 
 /*
@@ -100,8 +95,8 @@ class RobotAutoDriveByEncoder_RedBack : LinearOpMode() {
             chassis.setMode(DcMotor.RunMode.RUN_USING_ENCODER)
             servo.direction = Servo.Direction.FORWARD
             intakeMotor.power = 0.6
-
-//            launch {
+                launcherMotor.direction = DcMotorSimple.Direction.REVERSE
+            //            launch {
 //                while (opModeIsActive()) {
 //                    telemetry.addData("Info", "running A loop")
 //                    if (gamepad1.a) {

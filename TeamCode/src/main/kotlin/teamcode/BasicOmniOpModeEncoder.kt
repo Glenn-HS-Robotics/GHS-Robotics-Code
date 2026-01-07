@@ -26,7 +26,7 @@ class BasicOmniOpModeEncoder_Linear : LinearOpMode() {
     // Servo + kicker state
     private var pusher: Servo? = null
     private val REST_POS = 1.0
-    private val KICK_POS = 0.5
+    private val KICK_POS = 0.3
     private val KICK_TIME_MS = 1500
 
     private enum class KickState { IDLE, EXTENDING, RETRACTING }

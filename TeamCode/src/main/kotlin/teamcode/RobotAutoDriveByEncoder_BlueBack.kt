@@ -28,18 +28,11 @@
  */
 package teamcode
 
-import android.media.MediaPlayer
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode
 import com.qualcomm.robotcore.hardware.DcMotor
 import com.qualcomm.robotcore.hardware.Servo
-import com.qualcomm.robotcore.util.ElapsedTime
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
-import org.firstinspires.ftc.teamcode.R
-import kotlin.math.PI
 
 /*
  * This OpMode illustrates the concept of driving a path based on encoder counts.
@@ -97,7 +90,7 @@ class RobotAutoDriveByEncoder_BlueBack : LinearOpMode() {
             chassis.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER)
             chassis.setMode(DcMotor.RunMode.RUN_USING_ENCODER)
             servo.direction = Servo.Direction.FORWARD
-            intakeMotor.power = 0.6
+            intakeMotor.power = 1.0
 
 //            launch {
 //                while (opModeIsActive()) {
@@ -130,30 +123,32 @@ class RobotAutoDriveByEncoder_BlueBack : LinearOpMode() {
 //                delay(50)
 //            }
 
-            chassis.encoderHoris(-1.0)
-            chassis.encoderVert(25.0)
-            chassis.encoderVert(11.0, 0.2)
-            chassis.encoderDiagonal(-42.0, true)
-            intakeMotor.power = 0.0
-            chassis.encoderRotationRadians((3*PI)/4, 0.4)
-            launcherMotor.power = 1.0
-            sleep(1000)
-            //open ball 1
-            servo.position = 0.5
-            //start launcher
-            sleep(3000)
-            //close
-            servo.position = 1.0
-            sleep(2000)
-            //open ball 2
-            servo.position = 0.5
-            sleep(3000)
-            //close
-            servo.position = 1.0
-            launcherMotor.power = 0.0
+//            chassis.encoderHoris(-1.0)
+//            chassis.encoderVert(25.0)
+            chassis.encoderVert(12.0, 0.2)
+            chassis.encoderVert(24.0, 0.2)
 
-            chassis.encoderRotationRadians(PI/4.1, 0.4)
-            chassis.encoderVert(-26.0)
+//            chassis.encoderDiagonal(-42.0, true)
+//            intakeMotor.power = 0.0
+//            chassis.encoderRotationRadians((3*PI)/4, 0.4)
+//            launcherMotor.power = 1.0
+//            sleep(1000)
+//            //open ball 1
+//            servo.position = 0.5
+//            //start launcher
+//            sleep(3000)
+//            //close
+//            servo.position = 1.0
+//            sleep(2000)
+//            //open ball 2
+//            servo.position = 0.5
+//            sleep(3000)
+//            //close
+//            servo.position = 1.0
+//            launcherMotor.power = 0.0
+//
+//            chassis.encoderRotationRadians(PI/4.1, 0.4)
+//            chassis.encoderVert(-26.0)
 
 
         }
