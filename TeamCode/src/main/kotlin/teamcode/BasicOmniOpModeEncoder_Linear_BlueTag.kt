@@ -31,6 +31,11 @@ class BasicOmniOpModeEncoder_Linear_BlueTag : LinearOpMode() {
     private var launchMoto: DcMotor? = null
     private var intakeRuns: DcMotor? = null
 
+    private var hoodServoLeft: Servo? = null
+    private var hoodServoRight: Servo? = null
+
+
+
     // Servo + kicker state
     private var pusher: Servo? = null
     private val REST_POS = 1.0
@@ -98,6 +103,12 @@ class BasicOmniOpModeEncoder_Linear_BlueTag : LinearOpMode() {
         intakeRuns = hardwareMap.get(DcMotor::class.java, "intake_motor")
         launchMoto = hardwareMap.get(DcMotor::class.java, "launcher")
         pusher = hardwareMap.get(Servo::class.java, "servo_motor")
+        hoodServoLeft = hardwareMap.get(Servo::class.java, "launcherHood_left")
+        hoodServoRight = hardwareMap.get(Servo::class.java, "launcherHood_right")
+
+        hoodServoLeft!!.direction = Servo.Direction.FORWARD
+        hoodServoRight!!.direction = Servo.Direction.REVERSE
+
         pusher!!.position = REST_POS
 
         frontLeftDrive!!.direction = DcMotorSimple.Direction.REVERSE
@@ -266,6 +277,8 @@ class BasicOmniOpModeEncoder_Linear_BlueTag : LinearOpMode() {
                 else -> {}
             }
 
+            manageHood();
+
             telemetry.addData("Info", "Run Time: $runtime")
             telemetry.addData("Front left/Right", "%4.2f, %4.2f", frontLeftPower, frontRightPower)
             telemetry.addData("Back  left/Right", "%4.2f, %4.2f", backLeftPower, backRightPower)
@@ -289,6 +302,26 @@ class BasicOmniOpModeEncoder_Linear_BlueTag : LinearOpMode() {
         }
 
         if (::visionPortal.isInitialized) visionPortal.close()
+    }
+
+    private fun manageHood(){
+        var dPadUp = gamepad2.dpad_up
+        var dPadDown = gamepad2.dpad_down
+
+        if (dPadUp) {
+            if (hoodServoLeft!!.position > 0.12 || hoodServoRight!!.position > 0.12) return
+            hoodServoLeft!!.position += 0.005
+            hoodServoRight!!.position += 0.005
+        }
+
+//        1 = left
+//        2 = right
+
+        else if (dPadDown) {
+            if (hoodServoLeft!!.position <= .003 || hoodServoRight!!.position <= .003) return
+            hoodServoLeft!!.position -= 0.005
+            hoodServoRight!!.position -= 0.005
+        }
     }
 
     private fun setManualExposure(exposureMS: Int, gain: Int) {
