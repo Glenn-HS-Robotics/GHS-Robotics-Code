@@ -99,8 +99,6 @@ class BasicOmniOpModeEncoder_Linear_RedTag : LinearOpMode() {
 
         hoodServoLeft!!.direction = Servo.Direction.FORWARD
         hoodServoRight!!.direction = Servo.Direction.REVERSE
-        hoodServoLeft!!.position = 0.12
-        hoodServoRight!!.position = 0.12
 
         frontLeftDrive!!.direction = DcMotorSimple.Direction.REVERSE
         backLeftDrive!!.direction = DcMotorSimple.Direction.REVERSE
@@ -112,7 +110,7 @@ class BasicOmniOpModeEncoder_Linear_RedTag : LinearOpMode() {
 
         initAprilTag()
 
-        setManualExposure(5, 100)
+        setManualExposure(10, 100)
 
         telemetry.addData("Status", "Initialized")
         telemetry.update()

@@ -111,6 +111,9 @@ class BasicOmniOpModeEncoder_Linear_BlueTag : LinearOpMode() {
         hoodServoLeft!!.position = 0.12
         hoodServoRight!!.position = 0.12
 
+        hoodServoLeft!!.position = 0.12
+        hoodServoRight!!.position = 0.12
+
         pusher!!.position = REST_POS
 
         frontLeftDrive!!.direction = DcMotorSimple.Direction.REVERSE
