@@ -73,6 +73,9 @@ class BasicOmniOpModeEncoder_Linear_BlueTag : LinearOpMode() {
     // once centered, hold still for a bit (prevents chatter)
     private val HOLD_MS = 250.0
 
+    private var distancePlanar = 50.0
+
+
     private fun initAprilTag() {
         aprilTag = AprilTagProcessor.Builder()
             .setTagFamily(AprilTagProcessor.TagFamily.TAG_36h11)
@@ -191,6 +194,9 @@ class BasicOmniOpModeEncoder_Linear_BlueTag : LinearOpMode() {
             prevY = yNow
 
             val target = getTargetDetection()
+            if(target != null) {
+                distancePlanar = target.ftcPose.range
+            }
 
 
             if (alignEnabled && target != null && target.ftcPose != null) {
@@ -233,6 +239,11 @@ class BasicOmniOpModeEncoder_Linear_BlueTag : LinearOpMode() {
                 }
             }
 
+            val hoodHoodedness = getHoodHoodedness(); // 0-1
+            val angle = (hoodHoodedness - 0.003) * .12
+            hoodServoLeft!!.position = angle
+            hoodServoRight!!.position = angle
+
             val bNow = gamepad2.b
             if (bNow && !prevB) launcherEnabled = !launcherEnabled
             prevB = bNow
@@ -262,7 +273,7 @@ class BasicOmniOpModeEncoder_Linear_BlueTag : LinearOpMode() {
             backLeftDrive!!.power = backLeftPower
             backRightDrive!!.power = backRightPower
 
-            launchMoto!!.power = if (launcherEnabled) (if(target != null) getLauncherPower(target) else 0.6) else 0.0
+            launchMoto!!.power = if (launcherEnabled) (getLauncherPower()) else 0.0
             intakeRuns!!.power = if (intakeEnabled) intake_power else 0.0
 
             val xNow = gamepad2.x
@@ -288,7 +299,7 @@ class BasicOmniOpModeEncoder_Linear_BlueTag : LinearOpMode() {
             telemetry.addData("Info", "Run Time: $runtime")
             telemetry.addData("Front left/Right", "%4.2f, %4.2f", frontLeftPower, frontRightPower)
             telemetry.addData("Back  left/Right", "%4.2f, %4.2f", backLeftPower, backRightPower)
-            telemetry.addData("Launcher", "%4.2f (%s)", getLauncherPower(target), if (launcherEnabled) "ON" else "OFF")
+            telemetry.addData("Launcher", "%4.2f (%s)", getLauncherPower(), if (launcherEnabled) "ON" else "OFF")
             telemetry.addData("Intake", "%4.2f (%s)", intake_power, if (intakeEnabled) "ON" else "OFF")
             telemetry.addData("Pusher", "state=%s pos=%.2f", kickState, pusher!!.position)
 
@@ -364,11 +375,28 @@ class BasicOmniOpModeEncoder_Linear_BlueTag : LinearOpMode() {
         }
     }
 
-    fun getLauncherPower(target: AprilTagDetection?): Double{
-        if(target == null) return .6
-        val distancePlanar = target.ftcPose.range
-        telemetry.addData("Tag", "distance id=%d seen", distancePlanar)
+    fun getLauncherPower(): Double{
+        telemetry.addData("Tag distance", " distance=%f ", distancePlanar)
+        val normalized = (distancePlanar - 30)/70
+        var power: Double
+        power = if(normalized < 0.15) {
+            .55 + (normalized * .15)
+        }else if(normalized < 0.25) {
+                .43 + (normalized * .15)
+        }else if (normalized <1.0){
+            .36 + (normalized * .2)
+        } else{
+            .44 + (normalized * .2)
+        }
+        telemetry.addData("Tag power", " power=%f ", power)
+        return power
+    }
 
-        return .6
+    fun getHoodHoodedness(): Double{
+        val normalized = (distancePlanar - 30)/70
+        if(normalized > 0.5) return 1.0
+        val angledness = (normalized / .5)
+        telemetry.addData("Angledness amount", " power=%f ", angledness)
+        return angledness
     }
 }
