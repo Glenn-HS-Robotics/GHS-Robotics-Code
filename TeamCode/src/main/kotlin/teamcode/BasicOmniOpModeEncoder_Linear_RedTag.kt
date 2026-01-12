@@ -112,7 +112,7 @@ class BasicOmniOpModeEncoder_Linear_RedTag : LinearOpMode() {
 
         initAprilTag()
 
-        setManualExposure(10, 100)
+        setManualExposure(5, 100)
 
         telemetry.addData("Status", "Initialized")
         telemetry.update()
