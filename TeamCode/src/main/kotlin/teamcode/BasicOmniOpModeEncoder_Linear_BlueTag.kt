@@ -18,6 +18,7 @@ import kotlin.math.abs
 import kotlin.math.max
 import kotlin.math.sign
 
+
 @Suppress("unused")
 @TeleOp(name = "Basic: Omni Linear OpMode Encoder BLUE Tag", group = "Linear OpMode")
 class BasicOmniOpModeEncoder_Linear_BlueTag : LinearOpMode() {
@@ -46,7 +47,6 @@ class BasicOmniOpModeEncoder_Linear_BlueTag : LinearOpMode() {
     private var kickState = KickState.IDLE
     private val phaseTimer = ElapsedTime()
 
-    private val LAUNCHER_POWER = 1.0
     private val intake_power = 0.65
 
     // ================= AprilTag Rotate (BLUE) =================
@@ -192,6 +192,7 @@ class BasicOmniOpModeEncoder_Linear_BlueTag : LinearOpMode() {
 
             val target = getTargetDetection()
 
+
             if (alignEnabled && target != null && target.ftcPose != null) {
                 seenCount++
             } else {
@@ -261,7 +262,7 @@ class BasicOmniOpModeEncoder_Linear_BlueTag : LinearOpMode() {
             backLeftDrive!!.power = backLeftPower
             backRightDrive!!.power = backRightPower
 
-            launchMoto!!.power = if (launcherEnabled) LAUNCHER_POWER else 0.0
+            launchMoto!!.power = if (launcherEnabled) (if(target != null) getLauncherPower(target) else 0.6) else 0.0
             intakeRuns!!.power = if (intakeEnabled) intake_power else 0.0
 
             val xNow = gamepad2.x
@@ -287,7 +288,7 @@ class BasicOmniOpModeEncoder_Linear_BlueTag : LinearOpMode() {
             telemetry.addData("Info", "Run Time: $runtime")
             telemetry.addData("Front left/Right", "%4.2f, %4.2f", frontLeftPower, frontRightPower)
             telemetry.addData("Back  left/Right", "%4.2f, %4.2f", backLeftPower, backRightPower)
-            telemetry.addData("Launcher", "%4.2f (%s)", LAUNCHER_POWER, if (launcherEnabled) "ON" else "OFF")
+            telemetry.addData("Launcher", "%4.2f (%s)", getLauncherPower(target), if (launcherEnabled) "ON" else "OFF")
             telemetry.addData("Intake", "%4.2f (%s)", intake_power, if (intakeEnabled) "ON" else "OFF")
             telemetry.addData("Pusher", "state=%s pos=%.2f", kickState, pusher!!.position)
 
@@ -350,16 +351,24 @@ class BasicOmniOpModeEncoder_Linear_BlueTag : LinearOpMode() {
         // Set camera controls unless we are stopping.
         if (!isStopRequested()) {
             val exposureControl =
-                visionPortal!!.getCameraControl<ExposureControl>(ExposureControl::class.java)
-            if (exposureControl.getMode() != ExposureControl.Mode.Manual) {
+                visionPortal!!.getCameraControl(ExposureControl::class.java)
+            if (exposureControl.mode != ExposureControl.Mode.Manual) {
                 exposureControl.setMode(ExposureControl.Mode.Manual)
                 sleep(50)
             }
             exposureControl.setExposure(exposureMS.toLong(), TimeUnit.MILLISECONDS)
             sleep(20)
-            val gainControl = visionPortal!!.getCameraControl<GainControl>(GainControl::class.java)
-            gainControl.setGain(gain)
+            val gainControl = visionPortal!!.getCameraControl(GainControl::class.java)
+            gainControl.gain = gain
             sleep(20)
         }
+    }
+
+    fun getLauncherPower(target: AprilTagDetection?): Double{
+        if(target == null) return .6
+        val distancePlanar = target.ftcPose.range
+        telemetry.addData("Tag", "distance id=%d seen", distancePlanar)
+
+        return .6
     }
 }
