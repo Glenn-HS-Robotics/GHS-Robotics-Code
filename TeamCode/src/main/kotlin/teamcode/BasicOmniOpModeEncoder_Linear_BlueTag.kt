@@ -4,6 +4,7 @@ package teamcode
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp
 import com.qualcomm.robotcore.hardware.DcMotor
+import com.qualcomm.robotcore.hardware.DcMotorEx
 import com.qualcomm.robotcore.hardware.DcMotorSimple
 import com.qualcomm.robotcore.hardware.Servo
 import com.qualcomm.robotcore.util.ElapsedTime
@@ -29,7 +30,7 @@ class BasicOmniOpModeEncoder_Linear_BlueTag : LinearOpMode() {
     private var frontRightDrive: DcMotor? = null
     private var backRightDrive: DcMotor? = null
 
-    private var launchMoto: DcMotor? = null
+    private var launchMoto: DcMotorEx? = null
     private var intakeRuns: DcMotor? = null
 
     private var hoodServoLeft: Servo? = null
@@ -104,7 +105,7 @@ class BasicOmniOpModeEncoder_Linear_BlueTag : LinearOpMode() {
         backRightDrive = hardwareMap.get(DcMotor::class.java, "back_right")
 
         intakeRuns = hardwareMap.get(DcMotor::class.java, "intake_motor")
-        launchMoto = hardwareMap.get(DcMotor::class.java, "launcher")
+        launchMoto = hardwareMap.get(DcMotorEx::class.java, "launcher")
         pusher = hardwareMap.get(Servo::class.java, "servo_motor")
         hoodServoLeft = hardwareMap.get(Servo::class.java, "launcherHood_left")
         hoodServoRight = hardwareMap.get(Servo::class.java, "launcherHood_right")
@@ -273,7 +274,7 @@ class BasicOmniOpModeEncoder_Linear_BlueTag : LinearOpMode() {
             backLeftDrive!!.power = backLeftPower
             backRightDrive!!.power = backRightPower
 
-            launchMoto!!.power = if (launcherEnabled) (getLauncherPower()) else 0.0
+            launchMoto!!.velocity = if (launcherEnabled) (getLauncherPower() * 2450) else 0.0
             intakeRuns!!.power = if (intakeEnabled) intake_power else 0.0
 
             val xNow = gamepad2.x
