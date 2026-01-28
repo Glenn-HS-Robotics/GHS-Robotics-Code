@@ -138,17 +138,17 @@ class RobotAutoDriveByEncoder_BlueBack : LinearOpMode() {
             chassis.encoderRotationRadians((3*PI)/4, 0.4)
             launcherMotor.power = 1.0
             sleep(1000)
-            //open ball 1
+            // open ball 1
             servo.position = 0.5
-            //start launcher
+            // start launcher
             sleep(3000)
             //close
             servo.position = 1.0
             sleep(2000)
-            //open ball 2
+            // open ball 2
             servo.position = 0.5
             sleep(3000)
-            //close
+            // close
             servo.position = 1.0
             launcherMotor.power = 0.0
 
