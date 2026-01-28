@@ -23,10 +23,14 @@ class BasicOmniOpModeEncoder_Linear : LinearOpMode() {
     private var launchMoto: DcMotor? = null
     private var intakeRuns:DcMotor? = null
 
+    private var hoodServoLeft: Servo? = null
+    private var hoodServoRight: Servo? = null
+
+
     // Servo + kicker state
     private var pusher: Servo? = null
     private val REST_POS = 1.0
-    private val KICK_POS = 0.5
+    private val KICK_POS = 0.3
     private val KICK_TIME_MS = 1500
 
     private enum class KickState { IDLE, EXTENDING, RETRACTING }
@@ -46,6 +50,16 @@ class BasicOmniOpModeEncoder_Linear : LinearOpMode() {
         launchMoto = hardwareMap.get(DcMotor::class.java, "launcher")
         pusher = hardwareMap.get(Servo::class.java, "servo_motor")
         pusher!!.position = REST_POS
+
+        hoodServoLeft = hardwareMap.get(Servo::class.java, "launcherHood_left")
+        hoodServoRight = hardwareMap.get(Servo::class.java, "launcherHood_right")
+
+        hoodServoLeft!!.direction = Servo.Direction.FORWARD
+        hoodServoRight!!.direction = Servo.Direction.REVERSE
+
+        hoodServoLeft!!.position = 0.12
+        hoodServoRight!!.position = 0.12
+
 
         frontLeftDrive!!.direction = DcMotorSimple.Direction.REVERSE
         backLeftDrive!!.direction = DcMotorSimple.Direction.REVERSE
@@ -145,6 +159,8 @@ class BasicOmniOpModeEncoder_Linear : LinearOpMode() {
                 }
                 else -> {}
             }
+
+            manageHood()
             // <<< END ADDED SECTION
 
             telemetry.addData("Info", "Run Time: $runtime")
@@ -153,7 +169,29 @@ class BasicOmniOpModeEncoder_Linear : LinearOpMode() {
             telemetry.addData("Launcher", "%4.2f (%s)", LAUNCHER_POWER, if (launcherEnabled) "ON" else "OFF")
             telemetry.addData("Intake", "%4.2f (%s)", intake_power, if (intakeEnabled) "ON" else "OFF")
             telemetry.addData("Pusher", "state=%s pos=%.2f", kickState, pusher!!.position)
+            telemetry.addData("Servo", "servoLeft=%s servoRight=%.2f", hoodServoLeft!!.position, hoodServoRight!!.position)
+
             telemetry.update()
+        }
+    }
+
+    private fun manageHood(){
+        var dPadUp = gamepad2.dpad_up
+        var dPadDown = gamepad2.dpad_down
+
+        if (dPadUp) {
+            if (hoodServoLeft!!.position > 0.12 || hoodServoRight!!.position > 0.12) return
+            hoodServoLeft!!.position += 0.005
+            hoodServoRight!!.position += 0.005
+        }
+
+//        1 = left
+//        2 = right
+
+        else if (dPadDown) {
+            if (hoodServoLeft!!.position <= .003 || hoodServoRight!!.position <= .003) return
+            hoodServoLeft!!.position -= 0.005
+            hoodServoRight!!.position -= 0.005
         }
     }
 }
