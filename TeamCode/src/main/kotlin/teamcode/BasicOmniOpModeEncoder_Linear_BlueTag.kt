@@ -17,6 +17,7 @@ import org.firstinspires.ftc.vision.apriltag.AprilTagProcessor
 import java.util.concurrent.TimeUnit
 import kotlin.math.abs
 import kotlin.math.max
+import kotlin.math.pow
 import kotlin.math.sign
 
 
@@ -76,6 +77,10 @@ class BasicOmniOpModeEncoder_Linear_BlueTag : LinearOpMode() {
 
     private var distancePlanar = 50.0
 
+    private var setLauncherPowerExperimental = 0.0
+
+    private val powerApproximator =
+        PolynomialApproximation(-66.92431823, 10.78093689, -0.7497408548, 0.02987215741, -0.0007562628741, 0.00001273064853, -1.445116245 * 10.0.pow(-7), 1.093739166 * 10.0.pow(-9), -5.288811859 * 10.0.pow(-12), 1.477184641 * 10.0.pow(-14), -1.811606723 * 10.0.pow(-17))
 
     private fun initAprilTag() {
         aprilTag = AprilTagProcessor.Builder()
@@ -245,6 +250,18 @@ class BasicOmniOpModeEncoder_Linear_BlueTag : LinearOpMode() {
             hoodServoLeft!!.position = angle
             hoodServoRight!!.position = angle
 
+            if(gamepad2.dpadUpWasPressed())
+                setLauncherPowerExperimental += 0.05
+            else if(gamepad2.dpadDownWasPressed())
+                setLauncherPowerExperimental -= 0.05
+
+            if(gamepad2.dpadRightWasPressed())
+                setLauncherPowerExperimental += 0.005
+            else if(gamepad2.dpadLeftWasPressed())
+                setLauncherPowerExperimental -= 0.005
+
+            telemetry.addData("Power Set: ", "%f", setLauncherPowerExperimental)
+
             val bNow = gamepad2.b
             if (bNow && !prevB) launcherEnabled = !launcherEnabled
             prevB = bNow
@@ -269,12 +286,12 @@ class BasicOmniOpModeEncoder_Linear_BlueTag : LinearOpMode() {
                 backRightPower /= maxPow
             }
 
-            frontLeftDrive!!.power = frontLeftPower
-            frontRightDrive!!.power = frontRightPower
-            backLeftDrive!!.power = backLeftPower
-            backRightDrive!!.power = backRightPower
+            frontLeftDrive!!.power = frontLeftPower /2 //baby mode
+            frontRightDrive!!.power = frontRightPower /2
+            backLeftDrive!!.power = backLeftPower /2
+            backRightDrive!!.power = backRightPower /2
 
-            launchMoto!!.velocity = if (launcherEnabled) (getLauncherPower() * 2450) else 0.0
+            launchMoto!!.velocity = if (launcherEnabled) (getLauncherPower() * 2600) else 0.0
             intakeRuns!!.power = if (intakeEnabled) intake_power else 0.0
 
             val xNow = gamepad2.x
@@ -363,7 +380,7 @@ class BasicOmniOpModeEncoder_Linear_BlueTag : LinearOpMode() {
         // Set camera controls unless we are stopping.
         if (!isStopRequested()) {
             val exposureControl =
-                visionPortal!!.getCameraControl(ExposureControl::class.java)
+                visionPortal.getCameraControl(ExposureControl::class.java)
             if (exposureControl.mode != ExposureControl.Mode.Manual) {
                 exposureControl.setMode(ExposureControl.Mode.Manual)
                 sleep(50)
@@ -378,17 +395,15 @@ class BasicOmniOpModeEncoder_Linear_BlueTag : LinearOpMode() {
 
     fun getLauncherPower(): Double{
         telemetry.addData("Tag distance", " distance=%f ", distancePlanar)
-        val normalized = (distancePlanar - 30)/70
-        var power: Double
-        power = if(normalized < 0.15) {
-            .55 + (normalized * .15)
-        }else if(normalized < 0.25) {
-                .43 + (normalized * .15)
-        }else if (normalized <1.0){
-            .36 + (normalized * .2)
-        } else{
-            .44 + (normalized * .2)
+        val power =
+        if((distancePlanar <= 140 && distancePlanar > 103) || distancePlanar < 27){ // do linear approximation if not in bounds we tested to fit polynomial regression
+            powerApproximator.approximate(52.0)+0.00189405495879*(distancePlanar-52)
         }
+        else if(distancePlanar > 140){
+            powerApproximator.approximate(52.0)+0.00201889882271*(distancePlanar-52)
+
+        }
+        else powerApproximator.approximate(distancePlanar)
         telemetry.addData("Tag power", " power=%f ", power)
         return power
     }
