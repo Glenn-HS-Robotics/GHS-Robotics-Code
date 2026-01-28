@@ -22,10 +22,10 @@ class AutoBluePark : LinearOpMode() {
 
     override fun runOpMode() {
 
-        frontLeft = hardwareMap.get(DcMotor::class.java, "frontLeftDrive")
-        backLeft = hardwareMap.get(DcMotor::class.java, "backLeftDrive")
-        frontRight = hardwareMap.get(DcMotor::class.java, "frontRightDrive")
-        backRight = hardwareMap.get(DcMotor::class.java, "backRightDrive")
+        frontLeft = hardwareMap.get(DcMotor::class.java, "front_left")
+        backLeft = hardwareMap.get(DcMotor::class.java, "back_left")
+        frontRight = hardwareMap.get(DcMotor::class.java, "front_right")
+        backRight = hardwareMap.get(DcMotor::class.java, "back_right")
 
         frontLeft.direction = DcMotorSimple.Direction.REVERSE
         backLeft.direction = DcMotorSimple.Direction.REVERSE

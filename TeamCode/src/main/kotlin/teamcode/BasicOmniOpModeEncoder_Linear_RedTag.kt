@@ -149,6 +149,8 @@ class BasicOmniOpModeEncoder_Linear_RedTag : LinearOpMode() {
             telemetry.addLine("frontRight " + frontRightDrive!!.currentPosition)
             telemetry.addLine("backLeft " + backLeftDrive!!.currentPosition)
             telemetry.addLine("backRight " + backRightDrive!!.currentPosition)
+            telemetry.addLine("launcherHood_left " + hoodServoLeft!!.position)
+            telemetry.addLine("launcherHood_right " + hoodServoRight!!.position)
 
             var axial = -gamepad1.left_stick_y.toDouble()
             var lateral = gamepad1.left_stick_x.toDouble()

@@ -179,6 +179,8 @@ class BasicOmniOpModeEncoder_Linear_BlueTag : LinearOpMode() {
             telemetry.addLine("frontRight " + frontRightDrive!!.currentPosition)
             telemetry.addLine("backLeft " + backLeftDrive!!.currentPosition)
             telemetry.addLine("backRight " + backRightDrive!!.currentPosition)
+            telemetry.addLine("launcherHood_left " + hoodServoLeft!!.position)
+            telemetry.addLine("launcherHood_right " + hoodServoRight!!.position)
 
             var axial = -gamepad1.left_stick_y.toDouble()
             var lateral = gamepad1.left_stick_x.toDouble()
@@ -246,7 +248,7 @@ class BasicOmniOpModeEncoder_Linear_BlueTag : LinearOpMode() {
             }
 
             val hoodHoodedness = getHoodHoodedness(); // 0-1
-            val angle = (hoodHoodedness - 0.003) * .12
+            val angle = 0.02 + (hoodHoodedness - 0.003) * .10
             hoodServoLeft!!.position = angle
             hoodServoRight!!.position = angle
 

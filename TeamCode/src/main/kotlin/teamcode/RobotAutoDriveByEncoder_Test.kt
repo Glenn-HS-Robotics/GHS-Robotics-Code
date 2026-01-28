@@ -60,8 +60,8 @@ import kotlin.math.PI
  * Use Android Studio to Copy this Class, and Paste it into your team's code folder with a new name.
  * Remove or comment out the @Disabled line to add this OpMode to the Driver Station OpMode list
  */
-@Autonomous(name = "Auto Drive By Encoder Blue Back", group = "Robot")
-class RobotAutoDriveByEncoder_BlueBack : LinearOpMode() {
+@Autonomous(name = "Auto Drive By Encoder Test", group = "Robot")
+class RobotAutoDriveByEncoder_Test : LinearOpMode() {
     /* Declare OpMode members. */
     private lateinit var frontLeftDrive: DcMotor
     private lateinit var backLeftDrive: DcMotor
@@ -87,54 +87,27 @@ class RobotAutoDriveByEncoder_BlueBack : LinearOpMode() {
 
             waitForStart()
 
-            val chassis = Chassis(frontLeftDrive, frontRightDrive, backLeftDrive, backRightDrive, this@RobotAutoDriveByEncoder_BlueBack)
+            val chassis = Chassis(frontLeftDrive, frontRightDrive, backLeftDrive, backRightDrive, this@RobotAutoDriveByEncoder_Test)
             chassis.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER)
             chassis.setMode(DcMotor.RunMode.RUN_USING_ENCODER)
             servo.direction = Servo.Direction.FORWARD
             intakeMotor.power = 1.0
 
-            chassis.encoderVert(25.0)
-            chassis.encoderVert(11.0, 0.2)
-            chassis.encoderDiagonal(-42.0, true)
-            intakeMotor.power = 0.0
-            chassis.encoderRotationRadians((3*PI)/4, 0.4)
-            launcherMotor.power = 1.0
-            sleep(1000)
-            // open ball 1
-            servo.position = 0.5
-            // start launcher
-            sleep(3000)
-            //close
-            servo.position = 1.0
-            sleep(2000)
-            // open ball 2
-            servo.position = 0.5
-            sleep(3000)
-            // close
-            servo.position = 1.0
-            launcherMotor.power = 0.0
+            chassis.encoderVert(12.0)
+            chassis.encoderVert(-12.0)
+            chassis.encoderHoris(12.0)
+            chassis.encoderHoris(-12.0)
+            chassis.encoderDiagonal(12.0, false)
+            chassis.encoderDiagonal(-12.0, false)
+            chassis.encoderDiagonal(12.0, true)
+            chassis.encoderDiagonal(-12.0, true)
+            chassis.rotation(PI * 2)
 
-//            chassis.encoderDiagonal(-42.0, true)
-//            intakeMotor.power = 0.0
-//            chassis.encoderRotationRadians((3*PI)/4, 0.4)
-//            launcherMotor.power = 1.0
-//            sleep(1000)
-//            //open ball 1
-//            servo.position = 0.5
-//            //start launcher
-//            sleep(3000)
-//            //close
-//            servo.position = 1.0
-//            sleep(2000)
-//            //open ball 2
-//            servo.position = 0.5
-//            sleep(3000)
-//            //close
-//            servo.position = 1.0
-//            launcherMotor.power = 0.0
-//
-//            chassis.encoderRotationRadians(PI/4.1, 0.4)
-//            chassis.encoderVert(-26.0)
+
+
+
+
+
 
 
         }
