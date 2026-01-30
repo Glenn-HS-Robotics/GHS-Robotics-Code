@@ -26,19 +26,14 @@
  * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package teamcode
+package teamcode.auto
 
-import android.media.MediaPlayer
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode
 import com.qualcomm.robotcore.hardware.DcMotor
 import com.qualcomm.robotcore.hardware.Servo
-import com.qualcomm.robotcore.util.ElapsedTime
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
-import org.firstinspires.ftc.teamcode.R
+import teamcode.Chassis
 import kotlin.math.PI
 
 /*
@@ -66,8 +61,8 @@ import kotlin.math.PI
  * Use Android Studio to Copy this Class, and Paste it into your team's code folder with a new name.
  * Remove or comment out the @Disabled line to add this OpMode to the Driver Station OpMode list
  */
-@Autonomous(name = "Auto Test Fire", group = "Robot")
-class RobotAutoTestFire : LinearOpMode() {
+@Autonomous(name = "Auto Drive By Encoder Blue Back", group = "Robot")
+class RobotAutoDriveByEncoder_BlueBack : LinearOpMode() {
     /* Declare OpMode members. */
     private lateinit var frontLeftDrive: DcMotor
     private lateinit var backLeftDrive: DcMotor
@@ -78,8 +73,6 @@ class RobotAutoTestFire : LinearOpMode() {
     private lateinit var servo: Servo
 
     var gamepadBEnabled = false;
-
-
 
 
     override fun runOpMode() {
@@ -95,43 +88,60 @@ class RobotAutoTestFire : LinearOpMode() {
 
             waitForStart()
 
-            val chassis = Chassis(frontLeftDrive, frontRightDrive, backLeftDrive, backRightDrive, this@RobotAutoTestFire)
+            val chassis = Chassis(
+                frontLeftDrive,
+                frontRightDrive,
+                backLeftDrive,
+                backRightDrive,
+                this@RobotAutoDriveByEncoder_BlueBack
+            )
             chassis.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER)
             chassis.setMode(DcMotor.RunMode.RUN_USING_ENCODER)
             servo.direction = Servo.Direction.FORWARD
-            //intakeMotor.power = -0.6
+            intakeMotor.power = 1.0
 
-            launch {
-                while (opModeIsActive()) {
-                    telemetry.addData("Info", "running A loop")
-                    if (gamepad1.a) {
-                        telemetry.addData("Info", "pressed A")
-                        telemetry.update()
-                        servo.position = 0.5
-                        delay(3000)
-                        servo.position = 1.0
-                    }
-                    delay(10)
-                }
-            }
-            launch {
-                while (opModeIsActive()) {
-                    telemetry.addData("Info", "running B loop")
-                    if(gamepad1.b != gamepadBEnabled) {
-                        gamepadBEnabled = gamepad1.b
-                        launcherMotor.power = if (gamepad1.b) -1.0 else 0.0
-                        telemetry.addData("Info", "pressing B ${gamepad1.b}")
-                        telemetry.update()
-                    }
-                    delay(10)
-                }
-            }
+            chassis.encoderVert(25.0)
+            chassis.encoderVert(11.0, 0.2)
+            chassis.encoderDiagonal(-42.0, true)
+            intakeMotor.power = 0.0
+            chassis.encoderRotationRadians((3*PI)/4, 0.4)
+            launcherMotor.power = 1.0
+            sleep(1000)
+            // open ball 1
+            servo.position = 0.5
+            // start launcher
+            sleep(3000)
+            //close
+            servo.position = 1.0
+            sleep(2000)
+            // open ball 2
+            servo.position = 0.5
+            sleep(3000)
+            // close
+            servo.position = 1.0
+            launcherMotor.power = 0.0
 
-            while(opModeIsActive()){
-                telemetry.update()
-                delay(50)
-            }
-
+//            chassis.encoderDiagonal(-42.0, true)
+//            intakeMotor.power = 0.0
+//            chassis.encoderRotationRadians((3*PI)/4, 0.4)
+//            launcherMotor.power = 1.0
+//            sleep(1000)
+//            //open ball 1
+//            servo.position = 0.5
+//            //start launcher
+//            sleep(3000)
+//            //close
+//            servo.position = 1.0
+//            sleep(2000)
+//            //open ball 2
+//            servo.position = 0.5
+//            sleep(3000)
+//            //close
+//            servo.position = 1.0
+//            launcherMotor.power = 0.0
+//
+//            chassis.encoderRotationRadians(PI/4.1, 0.4)
+//            chassis.encoderVert(-26.0)
 
 
         }

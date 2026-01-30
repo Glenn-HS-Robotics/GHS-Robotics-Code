@@ -26,7 +26,7 @@
  * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package teamcode
+package teamcode.auto
 
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp
@@ -42,7 +42,6 @@ import org.firstinspires.ftc.robotcore.external.hardware.camera.controls.GainCon
 import org.firstinspires.ftc.vision.VisionPortal
 import org.firstinspires.ftc.vision.apriltag.AprilTagDetection
 import org.firstinspires.ftc.vision.apriltag.AprilTagProcessor
-import teamcode.BasicOmniOpModeEncoder_Linear.KickState
 import java.util.concurrent.TimeUnit
 import kotlin.math.abs
 import kotlin.math.max
@@ -86,7 +85,7 @@ import kotlin.math.max
  * Remove or comment out the @Disabled line to add this OpMode to the Driver Station OpMode list.
  *
  */
-@TeleOp(name = "Omni Drive To AprilTag", group = "Concept")
+@TeleOp(name = "Omni Drive To AprilTag", group = "Robot")
 class RobotAutoDriveToAprilTagOmni : LinearOpMode() {
     // Adjust these numbers to suit your robot.
     val DESIRED_DISTANCE: Double = 36.0 //  this is how close the camera should get to the target (inches)
@@ -194,7 +193,7 @@ class RobotAutoDriveToAprilTagOmni : LinearOpMode() {
             desiredTag = null
 
             // Step through the list of detected tags and look for a matching tag
-            val currentDetections: MutableList<AprilTagDetection> = aprilTag!!.getDetections()
+            val currentDetections: MutableList<AprilTagDetection> = aprilTag!!.detections
             for (detection in currentDetections) {
                 // Look to see if we have size info on this tag.
                 if (detection.metadata != null) {
@@ -306,7 +305,7 @@ class RobotAutoDriveToAprilTagOmni : LinearOpMode() {
             launchMotor!!.power = if(launcherEnabled) LAUNCHER_POWER else 0.0
 
 
-
+            telemetry.addLine("Moving to $drive $strafe $turn")
 
             telemetry.update()
 
@@ -411,7 +410,7 @@ class RobotAutoDriveToAprilTagOmni : LinearOpMode() {
         // Set camera controls unless we are stopping.
         if (!isStopRequested()) {
             val exposureControl =
-                visionPortal!!.getCameraControl<ExposureControl>(ExposureControl::class.java)
+                visionPortal!!.getCameraControl(ExposureControl::class.java)
             if (exposureControl.getMode() != ExposureControl.Mode.Manual) {
                 exposureControl.setMode(ExposureControl.Mode.Manual)
                 sleep(50)

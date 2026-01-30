@@ -1,6 +1,5 @@
-package teamcode
+package teamcode.util
 
-import java.util.ArrayList
 import kotlin.math.pow
 
 class PolynomialApproximation(vararg coefficient: Double) {

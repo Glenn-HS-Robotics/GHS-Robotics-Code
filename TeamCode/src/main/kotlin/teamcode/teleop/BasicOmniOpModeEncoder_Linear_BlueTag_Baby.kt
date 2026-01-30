@@ -1,5 +1,5 @@
 /* Copyright (c) 2021 FIRST. All rights reserved. */
-package teamcode
+package teamcode.teleop
 
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp
@@ -14,6 +14,7 @@ import org.firstinspires.ftc.robotcore.external.hardware.camera.controls.GainCon
 import org.firstinspires.ftc.vision.VisionPortal
 import org.firstinspires.ftc.vision.apriltag.AprilTagDetection
 import org.firstinspires.ftc.vision.apriltag.AprilTagProcessor
+import teamcode.util.PolynomialApproximation
 import java.util.concurrent.TimeUnit
 import kotlin.math.abs
 import kotlin.math.max
@@ -22,8 +23,8 @@ import kotlin.math.sign
 
 
 @Suppress("unused")
-@TeleOp(name = "Basic: Omni Linear OpMode Encoder BLUE Tag", group = "Linear OpMode")
-class BasicOmniOpModeEncoder_Linear_BlueTag : LinearOpMode() {
+@TeleOp(name = "BABY: Omni Linear OpMode Encoder BLUE Tag", group = "Linear OpMode")
+class BasicOmniOpModeEncoder_Linear_BlueTag_Baby : LinearOpMode() {
 
     private val runtime = ElapsedTime()
     private var frontLeftDrive: DcMotor? = null
@@ -80,7 +81,19 @@ class BasicOmniOpModeEncoder_Linear_BlueTag : LinearOpMode() {
     private var setLauncherPowerExperimental = 0.0
 
     private val powerApproximator =
-        PolynomialApproximation(-66.92431823, 10.78093689, -0.7497408548, 0.02987215741, -0.0007562628741, 0.00001273064853, -1.445116245 * 10.0.pow(-7), 1.093739166 * 10.0.pow(-9), -5.288811859 * 10.0.pow(-12), 1.477184641 * 10.0.pow(-14), -1.811606723 * 10.0.pow(-17))
+        PolynomialApproximation(
+            -66.92431823,
+            10.78093689,
+            -0.7497408548,
+            0.02987215741,
+            -0.0007562628741,
+            0.00001273064853,
+            -1.445116245 * 10.0.pow(-7),
+            1.093739166 * 10.0.pow(-9),
+            -5.288811859 * 10.0.pow(-12),
+            1.477184641 * 10.0.pow(-14),
+            -1.811606723 * 10.0.pow(-17)
+        )
 
     private fun initAprilTag() {
         aprilTag = AprilTagProcessor.Builder()
@@ -248,7 +261,7 @@ class BasicOmniOpModeEncoder_Linear_BlueTag : LinearOpMode() {
             }
 
             val hoodHoodedness = getHoodHoodedness(); // 0-1
-            val angle = 0.02 + (hoodHoodedness - 0.003) * .10
+            val angle = 0.04 + (hoodHoodedness - 0.003) * .08
             hoodServoLeft!!.position = angle
             hoodServoRight!!.position = angle
 
@@ -288,10 +301,10 @@ class BasicOmniOpModeEncoder_Linear_BlueTag : LinearOpMode() {
                 backRightPower /= maxPow
             }
 
-            frontLeftDrive!!.power = frontLeftPower /2 //baby mode
-            frontRightDrive!!.power = frontRightPower /2
-            backLeftDrive!!.power = backLeftPower /2
-            backRightDrive!!.power = backRightPower /2
+            frontLeftDrive!!.power = frontLeftPower /3 //baby mode
+            frontRightDrive!!.power = frontRightPower /3
+            backLeftDrive!!.power = backLeftPower /3
+            backRightDrive!!.power = backRightPower /3
 
             launchMoto!!.velocity = if (launcherEnabled) (getLauncherPower() * 2600) else 0.0
             intakeRuns!!.power = if (intakeEnabled) intake_power else 0.0

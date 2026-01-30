@@ -26,7 +26,7 @@
  * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package teamcode
+package teamcode.auto
 
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode
@@ -34,6 +34,7 @@ import com.qualcomm.robotcore.hardware.DcMotor
 import com.qualcomm.robotcore.hardware.DcMotorSimple
 import com.qualcomm.robotcore.hardware.Servo
 import kotlinx.coroutines.runBlocking
+import teamcode.Chassis
 import kotlin.math.PI
 
 /*
@@ -90,7 +91,13 @@ class RobotAutoDriveByEncoder_RedBack : LinearOpMode() {
 
             waitForStart()
 
-            val chassis = Chassis(frontLeftDrive, frontRightDrive, backLeftDrive, backRightDrive, this@RobotAutoDriveByEncoder_RedBack)
+            val chassis = Chassis(
+                frontLeftDrive,
+                frontRightDrive,
+                backLeftDrive,
+                backRightDrive,
+                this@RobotAutoDriveByEncoder_RedBack
+            )
             chassis.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER)
             chassis.setMode(DcMotor.RunMode.RUN_USING_ENCODER)
             servo.direction = Servo.Direction.FORWARD

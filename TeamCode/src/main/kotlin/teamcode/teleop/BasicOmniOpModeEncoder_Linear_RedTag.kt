@@ -1,5 +1,5 @@
 /* Copyright (c) 2021 FIRST. All rights reserved. */
-package teamcode
+package teamcode.teleop
 
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp
