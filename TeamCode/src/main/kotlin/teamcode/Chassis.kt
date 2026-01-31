@@ -9,7 +9,7 @@ import kotlin.math.PI
 import kotlin.math.abs
 import kotlin.math.max
 
-const val COUNTS_PER_MOTOR_REV = 460.27
+const val COUNTS_PER_MOTOR_REV = 205.63713 //460.27
 
 const val DRIVE_GEAR_REDUCTION = 1.0
 

@@ -4,6 +4,7 @@ package teamcode.teleop
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp
 import com.qualcomm.robotcore.hardware.DcMotor
+import com.qualcomm.robotcore.hardware.DcMotorEx
 import com.qualcomm.robotcore.hardware.DcMotorSimple
 import com.qualcomm.robotcore.hardware.Servo
 import com.qualcomm.robotcore.util.ElapsedTime
@@ -13,10 +14,13 @@ import org.firstinspires.ftc.robotcore.external.hardware.camera.controls.GainCon
 import org.firstinspires.ftc.vision.VisionPortal
 import org.firstinspires.ftc.vision.apriltag.AprilTagDetection
 import org.firstinspires.ftc.vision.apriltag.AprilTagProcessor
+import teamcode.util.PolynomialApproximation
 import java.util.concurrent.TimeUnit
 import kotlin.math.abs
 import kotlin.math.max
+import kotlin.math.pow
 import kotlin.math.sign
+
 
 @Suppress("unused")
 @TeleOp(name = "Basic: Omni Linear OpMode Encoder RED Tag", group = "Linear OpMode")
@@ -28,39 +32,68 @@ class BasicOmniOpModeEncoder_Linear_RedTag : LinearOpMode() {
     private var frontRightDrive: DcMotor? = null
     private var backRightDrive: DcMotor? = null
 
-    private var launchMoto: DcMotor? = null
+    private var launchMoto: DcMotorEx? = null
     private var intakeRuns: DcMotor? = null
 
     private var hoodServoLeft: Servo? = null
     private var hoodServoRight: Servo? = null
 
+
+
     // Servo + kicker state
     private var pusher: Servo? = null
     private val REST_POS = 1.0
-    private val KICK_POS = 0.3
+    private val KICK_POS = 0.1
     private val KICK_TIME_MS = 450   // faster return
 
     private enum class KickState { IDLE, EXTENDING, RETRACTING }
     private var kickState = KickState.IDLE
     private val phaseTimer = ElapsedTime()
 
-    private val LAUNCHER_POWER = 1.0
-    private val intake_power = 0.80
+    private val intake_power = 0.65
 
-    // ================= AprilTag Rotate (RED) =================
+    // ================= AprilTag Rotate (BLUE) =================
     private val TARGET_TAG_ID = 24
     private lateinit var aprilTag: AprilTagProcessor
     private lateinit var visionPortal: VisionPortal
 
+    // smoother controller
     private val TURN_KP = 0.012
-    private val YAW_TOL_DEG = 4.0
-    private val YAW_UNLOCK_DEG = 7.0
+    private val YAW_TOL_DEG = 3.0
+    private val YAW_UNLOCK_DEG = 4.0
+
     private val MAX_TURN = 0.22
+
+    // helps overcome static friction so it doesn't "stutter"
     private val MIN_TURN = 0.06
 
+    // controller drift guard
     private val STICK_DEADBAND = 0.06
+
+    // stability gate
     private val REQUIRED_SEEN_FRAMES = 4
+
+    // once centered, hold still for a bit (prevents chatter)
     private val HOLD_MS = 250.0
+
+    private var distancePlanar = 50.0
+
+    private var setLauncherPowerExperimental = 0.0
+
+    private val powerApproximator =
+        PolynomialApproximation(
+            -66.92431823,
+            10.78093689,
+            -0.7497408548,
+            0.02987215741,
+            -0.0007562628741,
+            0.00001273064853,
+            -1.445116245 * 10.0.pow(-7),
+            1.093739166 * 10.0.pow(-9),
+            -5.288811859 * 10.0.pow(-12),
+            1.477184641 * 10.0.pow(-14),
+            -1.811606723 * 10.0.pow(-17)
+        )
 
     private fun initAprilTag() {
         aprilTag = AprilTagProcessor.Builder()
@@ -80,7 +113,7 @@ class BasicOmniOpModeEncoder_Linear_RedTag : LinearOpMode() {
         }
         return null
     }
-    // =========================================================
+    // ==========================================================
 
     override fun runOpMode() {
 
@@ -90,15 +123,20 @@ class BasicOmniOpModeEncoder_Linear_RedTag : LinearOpMode() {
         backRightDrive = hardwareMap.get(DcMotor::class.java, "back_right")
 
         intakeRuns = hardwareMap.get(DcMotor::class.java, "intake_motor")
-        launchMoto = hardwareMap.get(DcMotor::class.java, "launcher")
+        launchMoto = hardwareMap.get(DcMotorEx::class.java, "launcher")
         pusher = hardwareMap.get(Servo::class.java, "servo_motor")
-        pusher!!.position = REST_POS
-
         hoodServoLeft = hardwareMap.get(Servo::class.java, "launcherHood_left")
         hoodServoRight = hardwareMap.get(Servo::class.java, "launcherHood_right")
 
         hoodServoLeft!!.direction = Servo.Direction.FORWARD
         hoodServoRight!!.direction = Servo.Direction.REVERSE
+        hoodServoLeft!!.position = 0.12
+        hoodServoRight!!.position = 0.12
+
+        hoodServoLeft!!.position = 0.12
+        hoodServoRight!!.position = 0.12
+
+        pusher!!.position = REST_POS
 
         frontLeftDrive!!.direction = DcMotorSimple.Direction.REVERSE
         backLeftDrive!!.direction = DcMotorSimple.Direction.REVERSE
@@ -110,7 +148,7 @@ class BasicOmniOpModeEncoder_Linear_RedTag : LinearOpMode() {
 
         initAprilTag()
 
-        setManualExposure(10, 100)
+        setManualExposure(5, 100)
 
         telemetry.addData("Status", "Initialized")
         telemetry.update()
@@ -139,8 +177,13 @@ class BasicOmniOpModeEncoder_Linear_RedTag : LinearOpMode() {
         var alignEnabled = false
         var lockedOn = false
 
+        // filtered yaw to reduce jitter
         var yawFiltered = 0.0
+
+        // stable detection gate
         var seenCount = 0
+
+        // lock hold timer
         val lockTimer = ElapsedTime()
 
         while (opModeIsActive()) {
@@ -160,6 +203,7 @@ class BasicOmniOpModeEncoder_Linear_RedTag : LinearOpMode() {
             if (abs(lateral) < STICK_DEADBAND) lateral = 0.0
             if (abs(yaw) < STICK_DEADBAND) yaw = 0.0
 
+            // Toggle align on Y press (gamepad2)
             val yNow = gamepad2.y
             if (yNow && !prevY) {
                 alignEnabled = !alignEnabled
@@ -171,6 +215,10 @@ class BasicOmniOpModeEncoder_Linear_RedTag : LinearOpMode() {
             prevY = yNow
 
             val target = getTargetDetection()
+            if(target != null) {
+                distancePlanar = target.ftcPose.range
+            }
+
 
             if (alignEnabled && target != null && target.ftcPose != null) {
                 seenCount++
@@ -181,18 +229,23 @@ class BasicOmniOpModeEncoder_Linear_RedTag : LinearOpMode() {
 
             if (alignEnabled && target != null && target.ftcPose != null && seenCount >= REQUIRED_SEEN_FRAMES) {
                 val yawErrDegRaw = target.ftcPose.yaw
+
+                // stronger smoothing
                 yawFiltered = 0.85 * yawFiltered + 0.15 * yawErrDegRaw
                 val yawErrDeg = yawFiltered
 
                 val withinYaw = abs(yawErrDeg) <= YAW_TOL_DEG
 
+                // lock when centered
                 if (!lockedOn && withinYaw) {
                     lockedOn = true
                     lockTimer.reset()
                 }
 
+                // stay locked for HOLD_MS even if tiny noise appears
                 val holding = lockedOn && lockTimer.milliseconds() < HOLD_MS
 
+                // unlock only if we are clearly off for a bit
                 if (lockedOn && !holding && abs(yawErrDeg) >= YAW_UNLOCK_DEG) {
                     lockedOn = false
                 }
@@ -200,11 +253,29 @@ class BasicOmniOpModeEncoder_Linear_RedTag : LinearOpMode() {
                 yaw = if (withinYaw || holding) {
                     0.0
                 } else {
+                    // P + feedforward min turn so motors actually move smoothly
                     var cmd = -yawErrDeg * TURN_KP
                     if (abs(cmd) < MIN_TURN) cmd = MIN_TURN * sign(cmd)
                     cmd.coerceIn(-MAX_TURN, MAX_TURN)
                 }
             }
+
+            val hoodHoodedness = getHoodHoodedness(); // 0-1
+            val angle =  0.04 + (hoodHoodedness - 0.003) * .08
+            hoodServoLeft!!.position = angle
+            hoodServoRight!!.position = angle
+
+            if(gamepad2.dpadUpWasPressed())
+                setLauncherPowerExperimental += 0.05
+            else if(gamepad2.dpadDownWasPressed())
+                setLauncherPowerExperimental -= 0.05
+
+            if(gamepad2.dpadRightWasPressed())
+                setLauncherPowerExperimental += 0.005
+            else if(gamepad2.dpadLeftWasPressed())
+                setLauncherPowerExperimental -= 0.005
+
+            telemetry.addData("Power Set: ", "%f", setLauncherPowerExperimental)
 
             val bNow = gamepad2.b
             if (bNow && !prevB) launcherEnabled = !launcherEnabled
@@ -230,12 +301,12 @@ class BasicOmniOpModeEncoder_Linear_RedTag : LinearOpMode() {
                 backRightPower /= maxPow
             }
 
-            frontLeftDrive!!.power = frontLeftPower
+            frontLeftDrive!!.power = frontLeftPower //baby mode
             frontRightDrive!!.power = frontRightPower
             backLeftDrive!!.power = backLeftPower
             backRightDrive!!.power = backRightPower
 
-            launchMoto!!.power = if (launcherEnabled) LAUNCHER_POWER else 0.0
+            launchMoto!!.velocity = if (launcherEnabled) (getLauncherPower() * 2600) else 0.0
             intakeRuns!!.power = if (intakeEnabled) intake_power else 0.0
 
             val xNow = gamepad2.x
@@ -256,10 +327,12 @@ class BasicOmniOpModeEncoder_Linear_RedTag : LinearOpMode() {
                 else -> {}
             }
 
+            manageHood();
+
             telemetry.addData("Info", "Run Time: $runtime")
             telemetry.addData("Front left/Right", "%4.2f, %4.2f", frontLeftPower, frontRightPower)
             telemetry.addData("Back  left/Right", "%4.2f, %4.2f", backLeftPower, backRightPower)
-            telemetry.addData("Launcher", "%4.2f (%s)", LAUNCHER_POWER, if (launcherEnabled) "ON" else "OFF")
+            telemetry.addData("Launcher", "%4.2f (%s)", getLauncherPower(), if (launcherEnabled) "ON" else "OFF")
             telemetry.addData("Intake", "%4.2f (%s)", intake_power, if (intakeEnabled) "ON" else "OFF")
             telemetry.addData("Pusher", "state=%s pos=%.2f", kickState, pusher!!.position)
 
@@ -268,11 +341,11 @@ class BasicOmniOpModeEncoder_Linear_RedTag : LinearOpMode() {
             telemetry.addData("SeenFrames", "%d/%d", seenCount, REQUIRED_SEEN_FRAMES)
 
             if (target != null && target.ftcPose != null) {
-                telemetry.addData("Tag", "RED id=%d seen", TARGET_TAG_ID)
+                telemetry.addData("Tag", "BLUE id=%d seen", TARGET_TAG_ID)
                 telemetry.addData("Pose", "yawRaw=%.1f yawF=%.1f y=%.1f z=%.1f",
                     target.ftcPose.yaw, yawFiltered, target.ftcPose.y, target.ftcPose.z)
             } else {
-                telemetry.addData("Tag", "RED id=%d not seen", TARGET_TAG_ID)
+                telemetry.addData("Tag", "BLUE id=%d not seen", TARGET_TAG_ID)
             }
 
             telemetry.update()
@@ -322,16 +395,39 @@ class BasicOmniOpModeEncoder_Linear_RedTag : LinearOpMode() {
         // Set camera controls unless we are stopping.
         if (!isStopRequested()) {
             val exposureControl =
-                visionPortal!!.getCameraControl<ExposureControl>(ExposureControl::class.java)
-            if (exposureControl.getMode() != ExposureControl.Mode.Manual) {
+                visionPortal.getCameraControl(ExposureControl::class.java)
+            if (exposureControl.mode != ExposureControl.Mode.Manual) {
                 exposureControl.setMode(ExposureControl.Mode.Manual)
                 sleep(50)
             }
             exposureControl.setExposure(exposureMS.toLong(), TimeUnit.MILLISECONDS)
             sleep(20)
-            val gainControl = visionPortal!!.getCameraControl<GainControl>(GainControl::class.java)
-            gainControl.setGain(gain)
+            val gainControl = visionPortal!!.getCameraControl(GainControl::class.java)
+            gainControl.gain = gain
             sleep(20)
         }
+    }
+
+    fun getLauncherPower(): Double{
+        telemetry.addData("Tag distance", " distance=%f ", distancePlanar)
+        val power =
+            if((distancePlanar <= 140 && distancePlanar > 103) || distancePlanar < 27){ // do linear approximation if not in bounds we tested to fit polynomial regression
+                powerApproximator.approximate(52.0)+0.00189405495879*(distancePlanar-52)
+            }
+            else if(distancePlanar > 140){
+                powerApproximator.approximate(52.0)+0.00201889882271*(distancePlanar-52)
+
+            }
+            else powerApproximator.approximate(distancePlanar)
+        telemetry.addData("Tag power", " power=%f ", power)
+        return power
+    }
+
+    fun getHoodHoodedness(): Double{
+        val normalized = (distancePlanar - 30)/70
+        if(normalized > 0.5) return 1.0
+        val angledness = (normalized / .5)
+        telemetry.addData("Angledness amount", " power=%f ", angledness)
+        return angledness
     }
 }

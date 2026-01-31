@@ -26,15 +26,15 @@
  * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package teamcode.auto
+package teamcode.old
 
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode
 import com.qualcomm.robotcore.hardware.DcMotor
 import com.qualcomm.robotcore.hardware.Servo
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import teamcode.Chassis
-import kotlin.math.PI
 
 /*
  * This OpMode illustrates the concept of driving a path based on encoder counts.
@@ -61,8 +61,8 @@ import kotlin.math.PI
  * Use Android Studio to Copy this Class, and Paste it into your team's code folder with a new name.
  * Remove or comment out the @Disabled line to add this OpMode to the Driver Station OpMode list
  */
-@Autonomous(name = "Auto Drive By Encoder Test", group = "Robot")
-class RobotAutoDriveByEncoder_Test : LinearOpMode() {
+@Autonomous(name = "Auto Drive By Encoder", group = "Robot")
+class RobotAutoDriveByEncoder_Linear : LinearOpMode() {
     /* Declare OpMode members. */
     private lateinit var frontLeftDrive: DcMotor
     private lateinit var backLeftDrive: DcMotor
@@ -72,7 +72,7 @@ class RobotAutoDriveByEncoder_Test : LinearOpMode() {
     private lateinit var intakeMotor: DcMotor
     private lateinit var servo: Servo
 
-    var gamepadBEnabled = false;
+
 
 
     override fun runOpMode() {
@@ -93,31 +93,45 @@ class RobotAutoDriveByEncoder_Test : LinearOpMode() {
                 frontRightDrive,
                 backLeftDrive,
                 backRightDrive,
-                this@RobotAutoDriveByEncoder_Test
+                this@RobotAutoDriveByEncoder_Linear
             )
             chassis.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER)
             chassis.setMode(DcMotor.RunMode.RUN_USING_ENCODER)
             servo.direction = Servo.Direction.FORWARD
-            intakeMotor.power = 1.0
+
+
+            launch {
+                intakeMotor.power = 0.4
+
+                while (true) {
+                    if (gamepad1.a) {
+                        launcherMotor.power = 1.0
+                        servo.position = 1.0
+                        sleep(1000)
+                        launcherMotor.power = 0.0
+                        servo.position = 0.0
+                    }
+                }
+            }
+
 
             chassis.encoderVert(12.0)
-            chassis.encoderVert(-12.0)
-            chassis.encoderHoris(12.0)
-            chassis.encoderHoris(-12.0)
-            chassis.encoderDiagonal(12.0, false)
-            chassis.encoderDiagonal(-12.0, false)
-            chassis.encoderDiagonal(12.0, true)
-            chassis.encoderDiagonal(-12.0, true)
-            chassis.rotation(PI * 2)
-
-
-
-
-
-
-
-
         }
     }
 
+    companion object {
+        // Calculate the COUNTS_PER_INCH for your specific drive train.
+        // Go to your motor vendor website to determine your motor's COUNTS_PER_MOTOR_REV
+        // For external drive gearing, set DRIVE_GEAR_REDUCTION as needed.
+        // For example, use a value of 2.0 for a 12-tooth spur gear driving a 24-tooth spur gear.
+        // This is gearing DOWN for less speed and more torque.
+        // For gearing UP, use a gear ratio less than 1.0. Note this will affect the direction of wheel rotation.
+        const val COUNTS_PER_MOTOR_REV = 537.5 // eg: TETRIX Motor Encoder
+        const val DRIVE_GEAR_REDUCTION = 1.0 // No External Gearing.
+        const val WHEEL_DIAMETER_INCHES = 4.09 // For figuring circumference
+        const val COUNTS_PER_INCH = COUNTS_PER_MOTOR_REV * DRIVE_GEAR_REDUCTION /
+                (WHEEL_DIAMETER_INCHES * 3.1415)
+        const val DRIVE_SPEED = 0.6
+        const val TURN_SPEED = 0.5
+    }
 }
