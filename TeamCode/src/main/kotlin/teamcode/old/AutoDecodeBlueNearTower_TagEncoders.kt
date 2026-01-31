@@ -1,4 +1,4 @@
-package teamcode.auto
+package teamcode.old
 
 import com.qualcomm.hardware.bosch.BNO055IMU
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous
