@@ -1,12 +1,13 @@
-package teamcode.old
+package teamcode.auto
 
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode
 import com.qualcomm.robotcore.hardware.DcMotor
 import com.qualcomm.robotcore.hardware.DcMotorSimple
+import teamcode.Chassis
 
-@Autonomous(name = "AutoRedPark", group = "Linear OpMode")
-class AutoRedPark : LinearOpMode() {
+@Autonomous(name = "ParkingToBlue", group = "Linear OpMode")
+class ParkingToBlue : LinearOpMode() {
 
     private lateinit var frontLeft: DcMotor
     private lateinit var backLeft: DcMotor
@@ -32,20 +33,20 @@ class AutoRedPark : LinearOpMode() {
         frontRight.direction = DcMotorSimple.Direction.FORWARD
         backRight.direction = DcMotorSimple.Direction.FORWARD
 
+        val chassis = Chassis(frontLeft, frontRight, backLeft, backRight, this)
+
         resetEncoders()
 
-        telemetry.addLine("Red Auto Initialized")
+        telemetry.addLine("Blue Auto Initialized")
         telemetry.update()
 
         waitForStart()
 
-        // Move forward 28 inches
-        encoderMove(28.0, 0.0)
+        chassis.encoderVert(28.0, .5)
 
-        // Strafe LEFT 24 inches into Red parking zone
-        encoderMove(0.0, 36.0)
+        chassis.encoderHoris(36.0, .5)
 
-        telemetry.addLine("Red Auto Complete")
+        telemetry.addLine("Blue Auto Complete")
         telemetry.update()
         sleep(500)
     }

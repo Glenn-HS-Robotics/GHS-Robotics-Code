@@ -26,7 +26,7 @@
  * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package teamcode.old
+package teamcode.auto
 
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode
@@ -80,8 +80,8 @@ class AutoRedBack : LinearOpMode() {
     private lateinit var backRightDrive: DcMotor
     private lateinit var launcherMotor: DcMotor
     private lateinit var intakeMotor: DcMotor
-    private var hoodServoLeft: Servo? = null
-    private var hoodServoRight: Servo? = null
+    private lateinit var hoodServoLeft: Servo
+    private lateinit var hoodServoRight: Servo
     private lateinit var pusher: Servo
     private var distancePlanar = 100.0
     private val TARGET_TAG_ID = 24
@@ -130,10 +130,10 @@ class AutoRedBack : LinearOpMode() {
             pusher = hardwareMap.get(Servo::class.java, "servo_motor")
             hoodServoLeft = hardwareMap.get(Servo::class.java, "launcherHood_left")
             hoodServoRight = hardwareMap.get(Servo::class.java, "launcherHood_right")
-            hoodServoLeft!!.direction = Servo.Direction.FORWARD
-            hoodServoRight!!.direction = Servo.Direction.REVERSE
-            hoodServoLeft!!.position = 0.13
-            hoodServoRight!!.position = 0.13
+            hoodServoLeft.direction = Servo.Direction.FORWARD
+            hoodServoRight.direction = Servo.Direction.REVERSE
+            hoodServoLeft.position = 0.13
+            hoodServoRight.position = 0.13
             launcherMotor.direction = DcMotorSimple.Direction.REVERSE
 
             waitForStart()
@@ -199,8 +199,8 @@ class AutoRedBack : LinearOpMode() {
     fun setHoodAngle(){
         val hoodHoodedness = getHoodHoodedness(); // 0-1
         val angle =  0.04 + (hoodHoodedness - 0.003) * .08
-        hoodServoLeft!!.position = angle
-        hoodServoRight!!.position = angle
+        hoodServoLeft.position = angle
+        hoodServoRight.position = angle
     }
 
     fun getLauncherPower(): Double{
@@ -234,12 +234,6 @@ class AutoRedBack : LinearOpMode() {
     }
 
     private fun setManualExposure(exposureMS: Int, gain: Int) {
-        // Wait for the camera to be open, then use the controls
-
-        if (visionPortal == null) {
-            return
-        }
-
         // Make sure camera is streaming before we try to set the exposure controls
         if (visionPortal.cameraState != VisionPortal.CameraState.STREAMING) {
             telemetry.addData("Camera", "Waiting")
@@ -261,7 +255,7 @@ class AutoRedBack : LinearOpMode() {
             }
             exposureControl.setExposure(exposureMS.toLong(), TimeUnit.MILLISECONDS)
             sleep(20)
-            val gainControl = visionPortal!!.getCameraControl(GainControl::class.java)
+            val gainControl = visionPortal.getCameraControl(GainControl::class.java)
             gainControl.gain = gain
             sleep(20)
         }
