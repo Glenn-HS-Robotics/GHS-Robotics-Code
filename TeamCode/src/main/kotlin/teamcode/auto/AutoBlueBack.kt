@@ -119,63 +119,58 @@ class AutoBlueBack : LinearOpMode() {
     }
 
     override fun runOpMode() {
-        runBlocking {
-            // Initialize the drive system variables.
-            frontLeftDrive = hardwareMap.get(DcMotor::class.java, "front_left")
-            backLeftDrive = hardwareMap.get(DcMotor::class.java, "back_left")
-            frontRightDrive = hardwareMap.get(DcMotor::class.java, "front_right")
-            backRightDrive = hardwareMap.get(DcMotor::class.java, "back_right")
-            launcherMotor = hardwareMap.get(DcMotor::class.java, "launcher")
-            intakeMotor = hardwareMap.get(DcMotor::class.java, "intake_motor")
-            pusher = hardwareMap.get(Servo::class.java, "servo_motor")
-            hoodServoLeft = hardwareMap.get(Servo::class.java, "launcherHood_left")
-            hoodServoRight = hardwareMap.get(Servo::class.java, "launcherHood_right")
-            hoodServoLeft.direction = Servo.Direction.FORWARD
-            hoodServoRight.direction = Servo.Direction.REVERSE
-            hoodServoLeft.position = 0.13
-            hoodServoRight.position = 0.13
-            launcherMotor.direction = DcMotorSimple.Direction.REVERSE
+       // Initialize the drive system variables.
+        frontLeftDrive = hardwareMap.get(DcMotor::class.java, "front_left")
+        backLeftDrive = hardwareMap.get(DcMotor::class.java, "back_left")
+        frontRightDrive = hardwareMap.get(DcMotor::class.java, "front_right")
+        backRightDrive = hardwareMap.get(DcMotor::class.java, "back_right")
+        launcherMotor = hardwareMap.get(DcMotor::class.java, "launcher")
+        intakeMotor = hardwareMap.get(DcMotor::class.java, "intake_motor")
+        pusher = hardwareMap.get(Servo::class.java, "servo_motor")
+        hoodServoLeft = hardwareMap.get(Servo::class.java, "launcherHood_left")
+        hoodServoRight = hardwareMap.get(Servo::class.java, "launcherHood_right")
+        hoodServoLeft.direction = Servo.Direction.FORWARD
+        hoodServoRight.direction = Servo.Direction.REVERSE
+        hoodServoLeft.position = 0.13
+        hoodServoRight.position = 0.13
+        launcherMotor.direction = DcMotorSimple.Direction.REVERSE
 
-            waitForStart()
-            initAprilTag()
-            setManualExposure(5, 100)
+        waitForStart()
+        initAprilTag()
+        setManualExposure(5, 100)
 
-            val chassis = Chassis(
-                frontLeftDrive,
-                frontRightDrive,
-                backLeftDrive,
-                backRightDrive,
-                this@AutoBlueBack
-            )
-            chassis.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER)
-            chassis.setMode(DcMotor.RunMode.RUN_USING_ENCODER)
-            pusher.direction = Servo.Direction.FORWARD
-            //intakeMotor.power = 1.0
+        val chassis = Chassis(
+            frontLeftDrive,
+            frontRightDrive,
+            backLeftDrive,
+            backRightDrive,
+            this@AutoBlueBack
+        )
+        chassis.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER)
+        chassis.setMode(DcMotor.RunMode.RUN_USING_ENCODER)
+        pusher.direction = Servo.Direction.FORWARD
+        //intakeMotor.power = 1.0
 
-            chassis.encoderVert(134.0, 0.6)
-            detectCode()
-            chassis.stop()
-            sleep(500)
-            chassis.encoderRotationRadians(-PI / 1.7, 0.3)
-            sleep(500)
+        chassis.encoderVert(134.0, 0.6)
+        detectCode()
+        chassis.stop()
+        sleep(500)
+        chassis.encoderRotationRadians(-PI / 1.7, 0.3)
+        sleep(500)
 
+        detectCode()
+        detectCode()
+        detectCode()
+        setHoodAngle()
+        launcherMotor.power = getLauncherPower()
+        sleep(2000)
+
+
+        for(i in 1..6) {
+            push()
             detectCode()
-            detectCode()
-            detectCode()
-            setHoodAngle()
             launcherMotor.power = getLauncherPower()
-            sleep(2000)
-
-
-            for(i in 1..6) {
-                push()
-                detectCode()
-                launcherMotor.power = getLauncherPower()
-                sleep(1000)
-            }
-
-
-
+            sleep(1000)
         }
     }
 
@@ -211,7 +206,6 @@ class AutoBlueBack : LinearOpMode() {
             }
             else if(distancePlanar > 140){
                 powerApproximator.approximate(52.0)+0.00201889882271*(distancePlanar-52)
-
             }
             else powerApproximator.approximate(distancePlanar)
         telemetry.addData("Tag power", " power=%f ", power)
@@ -246,7 +240,7 @@ class AutoBlueBack : LinearOpMode() {
         }
 
         // Set camera controls unless we are stopping.
-        if (!isStopRequested()) {
+        if (!isStopRequested) {
             val exposureControl =
                 visionPortal.getCameraControl(ExposureControl::class.java)
             if (exposureControl.mode != ExposureControl.Mode.Manual) {
