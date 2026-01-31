@@ -71,7 +71,7 @@ import kotlin.math.pow
  * Use Android Studio to Copy this Class, and Paste it into your team's code folder with a new name.
  * Remove or comment out the @Disabled line to add this OpMode to the Driver Station OpMode list
  */
-@Autonomous(name = "Final Blue Back", group = "Robot")
+@Autonomous(name = "Final Red Back", group = "Robot")
 class AutoRedBack : LinearOpMode() {
     /* Declare OpMode members. */
     private lateinit var frontLeftDrive: DcMotor
